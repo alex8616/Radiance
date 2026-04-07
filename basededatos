@@ -1,0 +1,223 @@
+-- =========================
+-- SUCURSALES
+-- =========================
+CREATE TABLE sucursales (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(150),
+    direccion VARCHAR(255),
+    telefono VARCHAR(50),
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL
+);
+
+-- =========================
+-- PACIENTES (SIN sucursal_id ❗)
+-- =========================
+CREATE TABLE pacientes (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+
+    nombre VARCHAR(100),  
+    apellido_paterno VARCHAR(100),  
+    apellido_materno VARCHAR(100),  
+    ci VARCHAR(50),  
+
+    fecha_nacimiento DATE,  
+    lugar_nacimiento VARCHAR(150),  
+
+    telefono VARCHAR(50),  
+    direccion VARCHAR(255),  
+    ocupacion VARCHAR(100),  
+    estado_civil VARCHAR(50),  
+    sexo VARCHAR(10),  
+
+    created_at TIMESTAMP NULL,  
+    updated_at TIMESTAMP NULL
+);
+
+-- =========================
+-- ANTECEDENTES MEDICOS
+-- =========================
+CREATE TABLE antecedentes_medicos (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    paciente_id BIGINT UNSIGNED UNIQUE,
+
+    antecedentes_familiares TEXT,  
+    antecedentes_personales TEXT,  
+
+    anemia BOOLEAN DEFAULT FALSE,  
+    cardiopatias BOOLEAN DEFAULT FALSE,  
+    asma BOOLEAN DEFAULT FALSE,  
+    diabetes BOOLEAN DEFAULT FALSE,  
+    enfermedades_gastricas BOOLEAN DEFAULT FALSE,  
+    hepatitis BOOLEAN DEFAULT FALSE,  
+    tuberculosis BOOLEAN DEFAULT FALSE,  
+    epilepsia BOOLEAN DEFAULT FALSE,  
+    hipertension BOOLEAN DEFAULT FALSE,  
+    vih BOOLEAN DEFAULT FALSE,  
+
+    alergias TEXT,  
+    en_tratamiento BOOLEAN DEFAULT FALSE,  
+    medicamentos TEXT,  
+    hemorragia_extraccion BOOLEAN DEFAULT FALSE,  
+
+    created_at TIMESTAMP NULL,  
+    updated_at TIMESTAMP NULL,  
+
+    FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE CASCADE
+);
+
+-- =========================
+-- HABITOS E HIGIENE
+-- =========================
+CREATE TABLE habitos_higiene (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    paciente_id BIGINT UNSIGNED UNIQUE,
+
+    fuma BOOLEAN DEFAULT FALSE,  
+    bebe BOOLEAN DEFAULT FALSE,  
+    otros_habitos TEXT,  
+
+    usa_cepillo BOOLEAN DEFAULT TRUE,  
+    usa_hilo_dental BOOLEAN DEFAULT FALSE,  
+    usa_enjuague BOOLEAN DEFAULT FALSE,  
+
+    frecuencia_cepillado VARCHAR(50),  
+    sangrado_encias BOOLEAN DEFAULT FALSE,  
+
+    ultima_visita_odontologo VARCHAR(100),  
+    usa_protesis BOOLEAN DEFAULT FALSE,  
+
+    created_at TIMESTAMP NULL,  
+    updated_at TIMESTAMP NULL,  
+
+    FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE CASCADE
+);
+
+-- =========================
+-- DOCTORES
+-- =========================
+CREATE TABLE doctores (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(150),
+    especialidad VARCHAR(100),
+    telefono VARCHAR(50),
+
+    created_at TIMESTAMP NULL,  
+    updated_at TIMESTAMP NULL
+);
+
+-- =========================
+-- DOCTOR - SUCURSAL (CON HORARIOS 🔥)
+-- =========================
+CREATE TABLE doctor_sucursal (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+
+    doctor_id BIGINT UNSIGNED,
+    sucursal_id BIGINT UNSIGNED,
+
+    dia_semana TINYINT, -- 1=lunes ... 7=domingo
+    hora_inicio TIME,
+    hora_fin TIME,
+
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL,
+
+    FOREIGN KEY (doctor_id) REFERENCES doctores(id) ON DELETE CASCADE,  
+    FOREIGN KEY (sucursal_id) REFERENCES sucursales(id) ON DELETE CASCADE
+);
+
+-- =========================
+-- CITAS (AGENDA PRINCIPAL)
+-- =========================
+CREATE TABLE citas (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+
+    paciente_id BIGINT UNSIGNED,  
+    doctor_id BIGINT UNSIGNED,  
+    sucursal_id BIGINT UNSIGNED,  
+
+    fecha DATE,  
+    hora_inicio TIME,  
+    hora_fin TIME,  
+
+    estado ENUM('pendiente','confirmado','atendido','cancelado') DEFAULT 'pendiente',  
+
+    motivo TEXT,  
+    observaciones TEXT,  
+
+    created_at TIMESTAMP NULL,  
+    updated_at TIMESTAMP NULL,  
+
+    FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE CASCADE,  
+    FOREIGN KEY (doctor_id) REFERENCES doctores(id) ON DELETE CASCADE,  
+    FOREIGN KEY (sucursal_id) REFERENCES sucursales(id) ON DELETE CASCADE
+);
+
+-- =========================
+-- TRATAMIENTOS DEL PACIENTE
+-- =========================
+CREATE TABLE tratamientos_paciente (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+
+    paciente_id BIGINT UNSIGNED,  
+    doctor_id BIGINT UNSIGNED,  
+    sucursal_id BIGINT UNSIGNED,  
+
+    nombre_tratamiento VARCHAR(150),  
+    descripcion TEXT,  
+
+    fecha_inicio DATE,  
+    fecha_fin_estimada DATE,  
+
+    costo_total DECIMAL(10,2),  
+
+    estado ENUM('activo','finalizado','cancelado') DEFAULT 'activo',  
+
+    created_at TIMESTAMP NULL,  
+    updated_at TIMESTAMP NULL,  
+
+    FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE CASCADE,  
+    FOREIGN KEY (doctor_id) REFERENCES doctores(id) ON DELETE CASCADE,  
+    FOREIGN KEY (sucursal_id) REFERENCES sucursales(id) ON DELETE CASCADE
+);
+
+-- =========================
+-- SESIONES DEL TRATAMIENTO
+-- =========================
+CREATE TABLE sesiones_tratamiento (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+
+    tratamiento_id BIGINT UNSIGNED,  
+    cita_id BIGINT UNSIGNED NULL,  
+
+    fecha DATE,  
+
+    descripcion TEXT,  
+    observaciones TEXT,  
+
+    created_at TIMESTAMP NULL,  
+    updated_at TIMESTAMP NULL,  
+
+    FOREIGN KEY (tratamiento_id) REFERENCES tratamientos_paciente(id) ON DELETE CASCADE,  
+    FOREIGN KEY (cita_id) REFERENCES citas(id) ON DELETE SET NULL
+);
+
+-- =========================
+-- PAGOS
+-- =========================
+CREATE TABLE pagos (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+
+    tratamiento_id BIGINT UNSIGNED,  
+    paciente_id BIGINT UNSIGNED,  
+
+    monto DECIMAL(10,2),  
+    fecha DATE,  
+    metodo_pago VARCHAR(50),  
+
+    created_at TIMESTAMP NULL,  
+    updated_at TIMESTAMP NULL,  
+
+    FOREIGN KEY (tratamiento_id) REFERENCES tratamientos_paciente(id) ON DELETE CASCADE,  
+    FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE CASCADE
+);
