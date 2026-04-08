@@ -1,5 +1,11 @@
 <!doctype html>
 <html lang="en">
+  <style>
+    .wrapper {
+      width: 90%;
+      margin: 0 auto; /* esto centra horizontalmente */
+    }
+  </style>
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
