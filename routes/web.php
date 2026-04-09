@@ -23,3 +23,6 @@ require __DIR__.'/auth.php';
 Route::get('/sucursales', [SucursalController::class, 'index'])
     ->name('sucursales.index')
     ->middleware(['auth', 'role:admin']);
+
+Route::post('/sucursales-create', [SucursalController::class, 'create']);
+Route::get('/sucursales-get', [SucursalController::class, 'GetSucursales']);

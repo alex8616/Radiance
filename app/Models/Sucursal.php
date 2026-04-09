@@ -11,7 +11,9 @@ class Sucursal extends Model
     protected $fillable = [
         'nombre',
         'direccion',
-        'telefono'
+        'telefono',
+        'latitud',
+        'longitud'
     ];
 
     // Relaciones futuras
