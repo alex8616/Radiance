@@ -2,7 +2,7 @@
 
 @section('content')
 
-<H1>HIKAS</H1>
+<H1>holas</H1>
 
 @endsection
 

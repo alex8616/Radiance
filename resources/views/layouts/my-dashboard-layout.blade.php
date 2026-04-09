@@ -118,6 +118,13 @@
               <li class="nav-item dropdown">
                   <a class="nav-link pl-lg-2" href="./index.html"><span class="ml-1">Inicio</span></a>
               </li>
+              @if(auth()->user()->role === 'admin')
+              <li class="nav-item dropdown">
+                  <a class="dropdown-toggle nav-link pl-lg-3" href="{{ route('sucursales.index') }}">
+                      Sucursales
+                  </a>
+              </li>
+              @endif
               <li class="nav-item dropdown">
                 <a href="#" id="ui-elementsDropdown" class="dropdown-toggle nav-link" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                   <span class="ml-lg-2">Calendario</span>
@@ -155,15 +162,19 @@
                   <a class="nav-link pl-lg-2" href="./table_datatables.html"><span class="ml-1">Data Tables</span></a>
                 </div>
               </li>
+              @if(auth()->user()->role === 'admin')
               <li class="nav-item dropdown">
-                <a class="dropdown-toggle nav-link pl-lg-3" href="#" id="chartsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Reportes </a>
-                <ul class="dropdown-menu" aria-labelledby="chartsDropdown">
-                  <a class="nav-link pl-lg-2" href="./chart-inline.html"><span class="ml-1">Inline Chart</span></a>
-                  <a class="nav-link pl-lg-2" href="./chart-chartjs.html"><span class="ml-1">Chartjs</span></a>
-                  <a class="nav-link pl-lg-2" href="./chart-apexcharts.html"><span class="ml-1">ApexCharts</span></a>
-                  <a class="nav-link pl-lg-2" href="./datamaps.html"><span class="ml-1">Datamaps</span></a>
-                </ul>
+                  <a class="dropdown-toggle nav-link pl-lg-3" href="#" id="chartsDropdown" role="button" data-toggle="dropdown">
+                      Reportes
+                  </a>
+                  <ul class="dropdown-menu">
+                      <a class="nav-link pl-lg-2" href="/reportes/inline"><span class="ml-1">Inline Chart</span></a>
+                      <a class="nav-link pl-lg-2" href="/reportes/chartjs"><span class="ml-1">Chartjs</span></a>
+                      <a class="nav-link pl-lg-2" href="/reportes/apex"><span class="ml-1">ApexCharts</span></a>
+                      <a class="nav-link pl-lg-2" href="/reportes/mapas"><span class="ml-1">Datamaps</span></a>
+                  </ul>
               </li>
+              @endif
             </ul>
           </div>
           <form class="form-inline ml-md-auto d-none d-lg-flex searchform text-muted">
@@ -182,37 +193,32 @@
               </a>
             </li>
             <li class="nav-item dropdown ml-lg-0">
-              <a class="nav-link dropdown-toggle text-muted" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span class="avatar avatar-sm mt-2">
-                  <img src="./assets/avatars/face-1.jpg" alt="..." class="avatar-img rounded-circle">
+              <a class="nav-link d-flex align-items-center" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span class="avatar avatar-sm d-flex align-items-center justify-content-center rounded-circle bg-primary text-white" style="width:32px; height:32px;">
+                  {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
                 </span>
+                <i class="ml-2 fas fa-chevron-down"></i>
               </a>
               <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
+                <li class="nav-item"><a class="nav-link pl-3" href="#">Settings</a></li>
+                <li class="nav-item"><a class="nav-link pl-3" href="#">Profile</a></li>
+                <li class="nav-item"><a class="nav-link pl-3" href="#">Activities</a></li>
                 <li class="nav-item">
-                  <a class="nav-link pl-3" href="#">Settings</a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link pl-3" href="#">Profile</a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link pl-3" href="#">Activities</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link pl-3" href="#"
-                      onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                        Cerrar sesión
-                    </a>
-
-                    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                        @csrf
-                    </form>
+                  <a class="nav-link pl-3" href="#"
+                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                    Cerrar sesión
+                  </a>
+                  <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                    @csrf
+                  </form>
                 </li>
               </ul>
             </li>
+
           </ul>
         </div>
       </nav>
-      <main role="main" class="main-content">
+      <main role="main" class="main-content" style="background-color: blue;">
         @yield('content')
       </main>
     </div>
@@ -227,7 +233,7 @@
             <div class="col-12 col-lg-auto mt-3 mt-lg-0">
                 <ul class="list-inline list-inline-dots mb-0">
                 <li class="list-inline-item">
-                    Copyright &copy; 2023
+                    Copyright &copy; 2026
                     <a href="." class="link-secondary">Alejandro</a>.
                     All rights reserved.
                 </li>
