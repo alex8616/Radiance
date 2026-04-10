@@ -8,6 +8,7 @@
   </style>
   <head>
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
@@ -123,6 +124,11 @@
               <li class="nav-item dropdown">
                   <a class="dropdown-toggle nav-link pl-lg-3" href="{{ route('sucursales.index') }}">
                       Sucursales
+                  </a>
+              </li>
+              <li class="nav-item dropdown">
+                  <a class="dropdown-toggle nav-link pl-lg-3" href="{{ route('usuarios.index') }}">
+                      Usuarios
                   </a>
               </li>
               @endif
@@ -275,6 +281,14 @@
     <script src="{{ asset('dashboard/js/dropzone.min.js') }}"></script>
     <script src="{{ asset('dashboard/js/uppy.min.js') }}"></script>
     <script src="{{ asset('dashboard/js/quill.min.js') }}"></script>
+
+    <script>
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+    </script>
 
     <script>
       $('.select2').select2(

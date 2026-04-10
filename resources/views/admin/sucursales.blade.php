@@ -51,7 +51,7 @@
         </div>
 
         <div class="col-md-4 bg-light" style="padding: 15px;">
-            <div class="card shadow" id="ContenidoDiv">
+            <div class="card shadow" id="ContenidoDiv" style="padding: 15px;">
             </div>
         </div>
     </div>
@@ -75,8 +75,8 @@
             // Formulario que se insertará
             const formulario = `
                 <div class="card">
-                    <div class="card-header" style="background: #2FA4D7">
-                        <h5 class="mb-0" style="color: white">Nuevo registro</h5>
+                    <div class="card-header">
+                        <h5 class="mb-0">Nuevo registro</h5>
                     </div>
 
                     <!-- Body (formulario) -->
@@ -199,8 +199,21 @@
 
         $("#ContenidoDiv").html(`
             <div class="card">
-                <div class="card-header" style="background: #2FA4D7">
-                    <h5 class="mb-0 text-white">Detalle de Sucursal</h5>
+                <div class="card-header">
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Detalle de Sucursal</h5>
+
+                        <div class="btn-group" role="group">
+                            <a type="button" class="btn mb-2 btn-primary" onclick="editarSucursal(${id})">
+                                <i class="fe fe-edit-3" style="color: white"></i> 
+                            </a>
+                            <a type="button" class="btn mb-2 btn-danger" onclick="eliminarSucursal(${id})">
+                                <i class="fe fe-delete" style="color: white"></i> 
+                            </a>
+                        </div>
+                    </div>
+
                 </div>
                 <div class="card-body">
                     <div class="row mb-2">
@@ -252,6 +265,104 @@
         }, 100);
     });
 
+    function editarSucursal(id) {
+        $.ajax({
+            url: '/sucursales-get/' + id,
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                let formulario = `
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Editar ${data.nombre}</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="formEditarSucursal">
+                                <input type="hidden" name="_method" value="PUT">
+                                <input type="hidden" name="id" value="${data.id}">
+                                <div class="mb-3">
+                                    <label for="nombre" class="form-label">Nombre</label>
+                                    <input type="text" class="form-control" id="nombre" name="nombre" value="${data.nombre}">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="direccion" class="form-label">Dirección</label>
+                                    <input type="text" class="form-control" id="direccion" name="direccion" value="${data.direccion}">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="telefono" class="form-label">Teléfono</label>
+                                    <input type="text" class="form-control" id="telefono" name="telefono" value="${data.telefono}">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="latitud" class="form-label">Latitud</label>
+                                    <input type="text" class="form-control" id="latitud" name="latitud" value="${data.latitud}">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="longitud" class="form-label">Longitud</label>
+                                    <input type="text" class="form-control" id="longitud" name="longitud" value="${data.longitud}">
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">Guardar cambios</button>
+                            </form>
+                        </div>
+                    </div>
+                `;
+
+                $("#ContenidoDiv").html(formulario);
+
+                $("#formEditarSucursal").on("submit", function(e) {
+                    e.preventDefault();
+
+                    $.ajax({
+                        url: '/sucursales-update/' + data.id,
+                        type: 'POST', // Laravel interpreta PUT gracias al hidden _method
+                        data: $(this).serialize(),
+                        success: function(resp) {
+                            mostrarEstadoEspera();
+                            cargarSucursales()
+                            toastSuccess("Registro Actualizado correctamente");
+                        },
+                        error: function(err) {
+                            toastError("Ocurrió un error al guardar");
+                        }
+                    });
+                });
+            },
+            error: function(err) {
+                console.error("Error al obtener sucursal:", err);
+            }
+        });
+    }
+
+    function eliminarSucursal(id) {
+        toastConfirm("¿Seguro que deseas eliminar esta sucursal?", 
+            function() {
+                // Acción si el usuario confirma
+                $.ajax({
+                    url: '/sucursales-delete/' + id,
+                    type: 'POST',
+                    data: { _method: 'DELETE' },
+                    success: function(resp) {
+                        if(resp.success) {
+                            toastSuccess(resp.message);
+                            mostrarEstadoEspera();
+                            cargarSucursales()
+                        } else {
+                            toastWarning(resp.message);
+                        }
+                    },
+                    error: function(err) {
+                        console.error("Error:", err);
+                        toastError("Hubo un problema al eliminar la sucursal");
+                    }
+                });
+            },
+            function() {
+                // Acción si el usuario cancela
+                toastWarning("Eliminación cancelada");
+            }
+        );
+    }
+
+    
     function cargarMapaSucursales() {
         $.ajax({
             url: "/sucursales-get",

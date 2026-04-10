@@ -6,13 +6,13 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('doctores', function (Blueprint $table) {
             $table->id();
+
+            // 🔥 relación con users
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
 
             $table->string('nombre', 150);
             $table->string('especialidad', 100)->nullable();
@@ -22,11 +22,8 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('doctors');
+        Schema::dropIfExists('doctores'); // 🔴 corregido
     }
 };

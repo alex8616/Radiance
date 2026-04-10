@@ -17,10 +17,6 @@ return new class extends Migration
             $table->foreignId('doctor_id')->constrained('doctores')->cascadeOnDelete();
             $table->foreignId('sucursal_id')->constrained('sucursales')->cascadeOnDelete();
 
-            $table->tinyInteger('dia_semana'); // 1=lunes ... 7=domingo
-            $table->time('hora_inicio');
-            $table->time('hora_fin');
-
             $table->timestamps();
         });
     }

@@ -10,9 +10,6 @@ class DoctorSucursal extends Model
     protected $fillable = [
         'doctor_id',
         'sucursal_id',
-        'dia_semana',
-        'hora_inicio',
-        'hora_fin'
     ];
 
     public function doctor()
