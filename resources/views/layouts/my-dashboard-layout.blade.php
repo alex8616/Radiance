@@ -184,9 +184,13 @@
               @endif
             </ul>
           </div>
-          <form class="form-inline ml-md-auto d-none d-lg-flex searchform text-muted">
-            <input class="form-control mr-sm-2 bg-transparent border-0 pl-4 text-muted" type="search" placeholder="Buscar " aria-label="Search">
-          </form>
+          @if(auth()->user()->role === 'doctor')
+            <form class="form-inline ml-md-auto d-none d-lg-flex">
+              <select class="form-control form-control-sm rounded-pill px-3" id="selectSucursal">
+                  <option value="">Seleccionar sucursal</option>
+              </select>
+            </form>
+          @endif
           <ul class="navbar-nav d-flex flex-row">
             <li class="nav-item">
               <a class="nav-link text-muted my-2" href="./#" id="modeSwitcher" data-mode="dark">
@@ -506,6 +510,56 @@
       }
       gtag('js', new Date());
       gtag('config', 'UA-56159088-1');
+    </script>
+    <script>
+    $(document).ready(function() {
+
+        cargarSucursalesDoctor();
+
+        function cargarSucursalesDoctor() {
+            $.ajax({
+                url: "/doctor-sucursales",
+                type: "GET",
+                success: function(res) {
+
+                    let options = '<option value="">Seleccionar sucursal</option>';
+
+                    res.data.forEach(function(item) {
+                        options += `<option value="${item.id}">${item.nombre}</option>`;
+                    });
+
+                    $("#selectSucursal").html(options);
+
+                    // 🔥 seleccionar la actual si existe en sesión
+                    let actual = "{{ session('sucursal_id') }}";
+                    if (actual) {
+                        $("#selectSucursal").val(actual);
+                    }
+                }
+            });
+        }
+
+        // 🔥 cuando cambia sucursal
+        $(document).on("change", "#selectSucursal", function() {
+
+            let sucursal_id = $(this).val();
+
+            if (!sucursal_id) return;
+
+            $.ajax({
+                url: "/cambiar-sucursal",
+                type: "POST",
+                data: {
+                    sucursal_id: sucursal_id,
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function() {
+                    location.reload(); // 🔥 recargar sistema
+                }
+            });
+        });
+
+    });
     </script>
   </body>
 </html>

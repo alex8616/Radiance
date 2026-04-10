@@ -82,3 +82,8 @@ Route::post('/seleccionar-sucursal', [DoctorController::class, 'seleccionarSucur
 Route::get('/seleccionar-sucursal', function () {
     return view('seleccionar-sucursal');
 });
+
+Route::post('/cambiar-sucursal', function (Illuminate\Http\Request $request) {
+    session(['sucursal_id' => $request->sucursal_id]);
+    return response()->json(['ok' => true]);
+});

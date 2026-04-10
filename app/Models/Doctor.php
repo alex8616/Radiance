@@ -25,6 +25,6 @@ class Doctor extends Model
     public function sucursales()
     {
         return $this->belongsToMany(Sucursal::class, 'doctor_sucursal')
-            ->withPivot('dia_semana', 'hora_inicio', 'hora_fin');
+            ->withTimestamps();
     }
 }
