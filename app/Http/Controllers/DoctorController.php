@@ -127,4 +127,8 @@ class DoctorController extends Controller
             'success' => true
         ]);
     }
+
+    public function lista(){
+        return view('doctor.lista');
+    }
 }

@@ -118,7 +118,7 @@
             </a>
             <ul class="navbar-nav mr-auto">
               <li class="nav-item dropdown">
-                  <a class="nav-link pl-lg-2" href="./index.html"><span class="ml-1">Inicio</span></a>
+                  <a class="nav-link pl-lg-2" href="{{ route('doctor.lista') }}"><span class="ml-1">Inicio</span></a>
               </li>
               @if(auth()->user()->role === 'admin')
               <li class="nav-item dropdown">
@@ -229,7 +229,7 @@
           </ul>
         </div>
       </nav>
-      <main role="main" class="main-content" style="background-color: blue;">
+      <main role="main" class="main-content">
         @yield('content')
       </main>
     </div>

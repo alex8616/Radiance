@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SucursalController;
 use App\Http\Controllers\DoctorController;
+use App\Http\Controllers\PacienteController;
 
 /*
 |--------------------------------------------------------------------------
@@ -87,3 +88,8 @@ Route::post('/cambiar-sucursal', function (Illuminate\Http\Request $request) {
     session(['sucursal_id' => $request->sucursal_id]);
     return response()->json(['ok' => true]);
 });
+
+    
+Route::get('/listas-pacientes', [DoctorController::class, 'lista'])->name('doctor.lista');
+Route::get('/buscar-pacientes', [PacienteController::class, 'buscar']);
+Route::get('/paciente/{id}', [PacienteController::class, 'show']);
