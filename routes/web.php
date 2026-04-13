@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SucursalController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\PacienteController;
+use App\Http\Controllers\TratamientoPacienteController;
 
 /*
 |--------------------------------------------------------------------------
@@ -93,3 +94,10 @@ Route::post('/cambiar-sucursal', function (Illuminate\Http\Request $request) {
 Route::get('/listas-pacientes', [DoctorController::class, 'lista'])->name('doctor.lista');
 Route::get('/buscar-pacientes', [PacienteController::class, 'buscar']);
 Route::get('/paciente/{id}', [PacienteController::class, 'show']);
+Route::post('/pacientes', [PacienteController::class, 'CrearPaciente']);
+Route::get('/get-paciente', [PacienteController::class, 'GetPaciente']);
+Route::post('/pacientes/{paciente}/antecedentes', [PacienteController::class, 'CrearAntecedente']);
+Route::get('/pacientes/{paciente}/antecedentes-show', [PacienteController::class, 'MostrarAntecendes'])->name('antecedentes.show');
+Route::get('/pacientes/{paciente}/tratamientos', [PacienteController::class, 'PacientesTratamientos'])->name('pacientes.tratamientos');
+Route::get('/categoria-get', [TratamientoPacienteController::class, 'GetCategorias']);
+Route::post('/pacientes/{paciente}/crear-tratamientos', [TratamientoPacienteController::class, 'CrearTratamiento']);

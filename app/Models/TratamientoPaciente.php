@@ -12,7 +12,7 @@ class TratamientoPaciente extends Model
         'paciente_id',
         'doctor_id',
         'sucursal_id',
-        'nombre_tratamiento',
+        'categoria_id',
         'descripcion',
         'fecha_inicio',
         'fecha_fin_estimada',
@@ -33,5 +33,11 @@ class TratamientoPaciente extends Model
     public function sucursal()
     {
         return $this->belongsTo(Sucursal::class);
+    }
+
+    // 🔥 RELACIÓN CLAVE
+    public function categoria()
+    {
+        return $this->belongsTo(CategoriaTratamiento::class, 'categoria_id');
     }
 }

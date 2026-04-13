@@ -37,10 +37,11 @@
                 </div>
                 <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab"> 
                     <div class="row">
-                        <div class="col-md-8 bg-light" style="padding: 15px;">
+                        <div class="col-md-7 bg-light" style="padding: 15px;">
                             <div class="card shadow">
                                 <div class="card-body">
-                                   <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <!-- Encabezado con botones -->
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
                                         <h5 class="card-title mb-0">Usuarios</h5>
                                         <div class="d-flex align-items-center">
                                             <a href="#" class="btn btn-outline-primary mr-2" id="bntListPaciente">
@@ -54,26 +55,36 @@
                                             </a>
                                         </div>
                                     </div>
-                                    <table class="table table-striped table-hover" id="TableUsuarios">
-                                    <thead>
-                                        <tr>
-                                        <th>ID</th>
-                                        <th>Nombre Completo</th>
-                                        <th>Documento</th>
-                                        <th>Celular</th>
-                                        <th>Direccion</th>
-                                        <th>Edad</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
+
+                                    <!-- Vista LISTA (tabla) -->
+                                    <div id="ListUsuarios">
+                                        <table class="table table-striped table-hover" id="TableUsuarios">
+                                            <thead>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Nombre Completo</th>
+                                                    <th>Documento</th>
+                                                    <th>Celular</th>
+                                                    <th>Direccion</th>
+                                                    <th>Edad</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- Aquí se llenan los usuarios en lista -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <!-- Vista GRID (tarjetas) -->
+                                    <div id="GridUsuarios" class="row d-none">
                                         
-                                    </tbody>
-                                    </table>
+                                    </div>
                                 </div>
                             </div>  
                         </div>
 
-                        <div class="col-md-4 bg-light" style="padding: 15px;">
+
+                        <div class="col-md-5 bg-light" style="padding: 15px;">
                             <div class="card shadow" id="ContenidoDiv" style="padding: 15px;">
                             </div>
                         </div>
@@ -85,9 +96,21 @@
 </div>
 <script src="{{ asset('js/utilidades.js') }}"></script>
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
     $(document).ready(function () {
+        $(document).on("submit", ".searchform", function(e) {
+            e.preventDefault();
+        });
+
+        $(document).on("keydown", "#buscarPaciente", function(e) {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                $(this).trigger("keyup"); // dispara búsqueda
+            }
+        });
+
         function ejecutarAccionTab(tabId) {
             if (tabId === "home-tab") {
                 SearchPaciente();
@@ -112,45 +135,32 @@
 </script>
 <script>
     function SearchPaciente(){
-
         let timeout = null;
-
         $("#buscarPaciente").on("keyup", function() {
-
             clearTimeout(timeout);
-
             let query = $(this).val();
-
-            // Evitar consultas muy cortas
             if (query.length < 2) {
                 $("#DivResultadoPaciente").html("");
                 return;
             }
-
-            // 🔥 MOSTRAR LOADING INMEDIATO
             $("#DivResultadoPaciente").html(`
                 <div class="d-flex flex-column justify-content-center align-items-center text-muted" style="padding:30px;">
                     <div class="spinner-border text-primary" role="status"></div>
                     <span class="mt-2">Buscando...</span>
                 </div>
             `);
-
             timeout = setTimeout(function() {
-
                 $.ajax({
                     url: "/buscar-pacientes",
                     type: "GET",
                     data: { search: query },
                     success: function(res) {
-
+                        console.log("entro al succes");
                         let html = "";
-
                         if (res.data.length === 0) {
                             let query = $("#buscarPaciente").val();
-
                             html = `
                                 <div class="text-center text-muted">No se encontraron resultados</div>
-
                                 <div class="text-center mt-2">
                                     <button class="btn btn-primary btnRegistrarPaciente" data-ci="${query}">
                                         Registrar Paciente
@@ -169,11 +179,12 @@
                                             </div>
                                             <div>
                                                 <button class="btn btn-sm btn-primary btnVerPaciente"
+                                                    data-id="${p.id}"
                                                     data-nombre="${p.nombre}"
                                                     data-apellido-paterno="${p.apellido_paterno}"
                                                     data-apellido-materno="${p.apellido_materno}"
                                                     data-ci="${p.ci}">
-                                                    Ver
+                                                    Atender
                                                 </button>
                                             </div>
                                         </div>
@@ -196,73 +207,247 @@
 
         });
 
-        // 🔥 EVENTO CLICK EN "VER"
         $(document).on("click", ".btnVerPaciente", function() {
-
-            const nombre = $(this).data("nombre");
-            const apPaterno = $(this).data("apellido-paterno");
-            const apMaterno = $(this).data("apellido-materno");
-            const ci = $(this).data("ci");
-
-            const nombreCompleto = `${nombre} ${apPaterno} ${apMaterno}`;
-
+            const pacienteId = $(this).data("id");
+    
             $("#ContenidoDivPaciente").html(`
-                <div class="card shadow-sm border-info">
-                    <div class="card-header bg-info text-white">
-                        <h5 class="mb-0">Detalle del Paciente</h5>
+                <div class="card shadow-sm">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Atender Paciente</h5>
+                        <a href="#" class="btn btn-sm btn-outline-primary" id="btnAgregarTratamiento" data-paciente-id="${pacienteId}">
+                            Agregar tratamiento
+                        </a>
                     </div>
-                    <div class="card-body">
-                        <div class="row mb-2">
-                            <div class="col-md-4 font-weight-bold text-muted">Nombre:</div>
-                            <div class="col-md-8">${nombreCompleto}</div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-4 font-weight-bold text-muted">C.I:</div>
-                            <div class="col-md-8">${ci}</div>
-                        </div>
+
+                    <div class="card-body" id="DivTratamiento">
+                        <p>Cargando tratamientos...</p>
                     </div>
                 </div>
             `);
 
-        });
+            // 🔥 Consultar tratamientos del paciente
+            fetch(`/pacientes/${pacienteId}/tratamientos`)
+                .then(res => res.json())
+                .then(data => {
+                    const div = document.getElementById("DivTratamiento");
 
-    }
+                    if (data.length > 0) {
+                        let html = `<h6>Tratamientos en proceso</h6>`;
+                        data.forEach(t => {
+                            html += `
+                                <div class="card mb-2 shadow-sm">
+                                    <div class="card-body">
+                                        <p><strong>Nombre:</strong> ${t.categoria?.nombre }</p>
+                                        <p><strong>Descripción:</strong> ${t.descripcion}</p>
+                                        <p><strong>Fecha inicio:</strong> ${t.fecha_inicio}</p>
+                                        <p><strong>Fecha fin estimada:</strong> ${t.fecha_fin_estimada}</p>
+                                        <p><strong>Costo total:</strong> ${t.costo_total}</p>
+                                        <p><strong>Estado:</strong> ${t.estado}</p>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        div.innerHTML = html;
+                    } else {
+                        div.innerHTML = `<div class="alert alert-warning">Este paciente no tiene tratamientos en proceso.</div>`;
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    document.getElementById("DivTratamiento").innerHTML = `<div class="alert alert-danger">Error al cargar tratamientos.</div>`;
+                });
+            });
+
+            // 🔹 CLICK: Renderiza el formulario
+            $(document).on("click", "#btnAgregarTratamiento", function() {
+                const pacienteId = $(this).data("paciente-id");
+
+                $("#DivTratamiento").html(`
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            Registrar Nuevo Tratamiento
+                        </div>
+                        <div class="card-body">
+                            <form id="formTratamiento" data-paciente-id="${pacienteId}">
+                                <div class="form-group">
+                                    <label>Categoría del tratamiento</label>
+                                    <select class="form-control" name="categoria_id" id="selectCategoria" required>
+                                        <option value="">Cargando categorías...</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Descripción</label>
+                                    <textarea class="form-control" name="descripcion" rows="3"></textarea>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label>Fecha inicio</label>
+                                        <input type="date" class="form-control" name="fecha_inicio" required>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>Fecha fin estimada</label>
+                                        <input type="date" class="form-control" name="fecha_fin_estimada">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Costo total</label>
+                                    <input type="number" step="0.01" class="form-control" name="costo_total" required>
+                                </div>
+                                <div class="text-right">
+                                    <button type="submit" class="btn btn-success" id="btnGuardarTratamiento">
+                                        Guardar Tratamiento
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                `);
+
+                // 🔥 Cargar categorías
+                $.ajax({
+                    url: '/categoria-get',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(data) {
+                        let options = '<option value="">Seleccione una categoría</option>';
+                        data.forEach(cat => {
+                            options += `<option value="${cat.id}">${cat.nombre}</option>`;
+                        });
+                        $("#selectCategoria").html(options);
+                    },
+                    error: function() {
+                        $("#selectCategoria").html('<option value="">Error al cargar categorías</option>');
+                    }
+                });
+            });
+
+
+            // 🔹 SUBMIT: SOLO UNA VEZ (FUERA DEL CLICK)
+            let enviando = false;
+
+            $(document).on("submit", "#formTratamiento", function(e) {
+                e.preventDefault();
+
+                if (enviando) return; // 🔥 evita doble envío
+                enviando = true;
+
+                const form = $(this);
+                const pacienteId = form.data("paciente-id");
+                const formData = form.serialize();
+
+                // 🔥 Desactivar botón mientras envía
+                $("#btnGuardarTratamiento").prop("disabled", true).text("Guardando...");
+
+                $.ajax({
+                    url: `/pacientes/${pacienteId}/crear-tratamientos`,
+                    type: 'POST',
+                    data: formData,
+                    success: function(response) {
+                        alert("✅ Tratamiento registrado correctamente");
+                        $("#DivTratamiento").html(`
+                            <div class="alert alert-success">
+                                Tratamiento guardado con éxito.
+                            </div>
+                        `);
+                    },
+                    error: function(xhr) {
+                        alert("❌ Error al registrar tratamiento");
+                        console.error(xhr.responseText);
+                    },
+                    complete: function() {
+                        enviando = false;
+                        $("#btnGuardarTratamiento").prop("disabled", false).text("Guardar Tratamiento");
+                    }
+                });
+            });
+        }
 </script>
 <script>
-    $(document).on("click", ".btnRegistrarPaciente", function() {
-
-        // 🔥 Obtener valor del input de búsqueda
-        const valorBusqueda = $("#buscarPaciente").val();
-
-        // 🔥 Cambiar al tab
-        $('#profile-tab').tab('show');
-
-        // 🔥 Insertar formulario con valor ya cargado
+    function renderFormularioPaciente(valorBusqueda = '') {
         $("#ContenidoDiv").html(`
             <div class="card">
-                <div class="card-header bg-primary text-white">
+                <div class="card-header">
                     <h5 class="mb-0">Registrar Paciente</h5>
                 </div>
                 <div class="card-body">
-                    <form id="formPaciente">
+                    <form id="formPaciente" enctype="multipart/form-data">
                         <div class="form-group">
-                            <label>Nombre</label>
-                            <input type="text" class="form-control" name="nombre" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Apellido Paterno</label>
-                            <input type="text" class="form-control" name="apellido_paterno" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Apellido Materno</label>
-                            <input type="text" class="form-control" name="apellido_materno">
-                        </div>
-
-                        <div class="form-group">
-                            <label>C.I</label>
+                            <label>Cedula De Identidad</label>
                             <input type="text" class="form-control" name="ci" value="${valorBusqueda}" required>
+                        </div>
+
+                        <div class="form-row row">
+                            <div class="form-group col-md-4">
+                                <label>Nombre</label>
+                                <input type="text" class="form-control" name="nombre" required>
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label>Apellido Paterno</label>
+                                <input type="text" class="form-control" name="apellido_paterno" required>
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label>Apellido Materno</label>
+                                <input type="text" class="form-control" name="apellido_materno">
+                            </div>
+                        </div>
+
+                        <div class="form-row row">
+                            <div class="form-group col-md-6">
+                                <label>Fecha Nacimiento</label>
+                                <input type="date" class="form-control" name="fecha_nacimiento" id="fecha_nacimiento" required>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label>Edad</label>
+                                <input type="text" class="form-control" name="edad" id="edad" readonly>
+                            </div>
+                        </div>
+
+                        <div class="form-row row">
+                            <div class="form-group col-md-6">
+                                <label>Lugar Nacimiento</label>
+                                <input type="text" class="form-control" name="lugar_nacimiento" required>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label>Direccion</label>
+                                <input type="text" class="form-control" name="direccion" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row row">
+                            <div class="form-group col-md-6">
+                                <label>Ocupacion</label>
+                                <input type="text" class="form-control" name="ocupacion" required>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label>Telefono</label>
+                                <input type="text" class="form-control" name="telefono" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row row">
+                            <div class="form-group col-md-6">
+                                <label>Estado</label>
+                                <select class="form-control" name="estado" required>
+                                    <option value="Soltero">Soltero</option>
+                                    <option value="Casado">Casado</option>
+                                    <option value="Divorciado">Divorciado</option>
+                                    <option value="Viudo">Viudo</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label>Genero</label>
+                                <select class="form-control" name="genero" required>
+                                    <option value="Masculino">Masculino</option>
+                                    <option value="Femenino">Femenino</option>
+                                    <option value="Otro">Otro</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- 🔥 Imagen en su propia fila -->
+                        <div class="form-group">
+                            <label>Imagen</label>
+                            <input type="file" class="form-control" name="imagen" accept="image/*">
                         </div>
 
                         <button type="submit" class="btn btn-success w-100">
@@ -272,6 +457,672 @@
                 </div>
             </div>
         `);
+
+        // calcular edad
+        $(document).off('change', '#fecha_nacimiento').on('change', '#fecha_nacimiento', function () {
+            const fechaNacimiento = new Date(this.value);
+            const hoy = new Date();
+
+            let edad = hoy.getFullYear() - fechaNacimiento.getFullYear();
+            const mes = hoy.getMonth() - fechaNacimiento.getMonth();
+
+            if (mes < 0 || (mes === 0 && hoy.getDate() < fechaNacimiento.getDate())) {
+                edad--;
+            }
+
+            $('#edad').val(edad);
+        });
+    }
+
+    // botón con búsqueda
+    $(document).on("click", ".btnRegistrarPaciente", function() {
+        const valorBusqueda = $("#buscarPaciente").val();
+
+        $('#profile-tab').tab('show');
+
+        $('#profile-tab')
+            .off('shown.bs.tab')
+            .on('shown.bs.tab', function () {
+                renderFormularioPaciente(valorBusqueda);
+            });
+    });
+
+    // botón agregar
+    $(document).on("click", "#btnAgregarUsuario", function(e) {
+        e.preventDefault();
+
+        $('#profile-tab').tab('show');
+
+        setTimeout(function() {
+            renderFormularioPaciente();
+        }, 100);
+    });
+
+    // 🔥 SUBMIT CORREGIDO (CON IMAGEN)
+    $(document).off("submit", "#formPaciente").on("submit", "#formPaciente", function(e) {
+        e.preventDefault();
+
+        let formData = new FormData(this);
+
+        $.ajax({
+            url: "/pacientes",
+            method: "POST",
+            data: formData,
+            processData: false, // 🔥 importante
+            contentType: false, // 🔥 importante
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(response) {
+                toastSuccess("Paciente Registrado Correctamente");
+                mostrarEstadoEspera();
+            },
+            error: function(xhr) {
+                toastError("Hubo un problema al registrar el paciente");
+            }
+        });
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+
+        const btnList = document.getElementById("bntListPaciente");
+        const btnGrid = document.getElementById("btnGridPaciente");
+        const listUsuarios = document.getElementById("ListUsuarios");
+        const gridUsuarios = document.getElementById("GridUsuarios");
+
+        // 🔥 TRAER PACIENTES
+        function cargarPacientes() {
+            return fetch('/get-paciente')
+                .then(res => res.json());
+        }
+
+        // 🔥 CALCULAR EDAD
+        function calcularEdad(fechaNacimiento) {
+            const hoy = new Date();
+            const nacimiento = new Date(fechaNacimiento);
+
+            let edad = hoy.getFullYear() - nacimiento.getFullYear();
+            const m = hoy.getMonth() - nacimiento.getMonth();
+
+            if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) {
+                edad--;
+            }
+
+            return edad;
+        }
+
+        // 🔥 RENDER LISTA
+        function renderLista(data) {
+            const tbody = document.querySelector("#TableUsuarios tbody");
+            tbody.innerHTML = "";
+
+            data.forEach(p => {
+                const tr = document.createElement("tr");
+
+                tr.innerHTML = `
+                    <td>${p.id}</td>
+                    <td>${p.nombre} ${p.apellido_paterno} ${p.apellido_materno}</td>
+                    <td>${p.ci}</td>
+                    <td>${p.telefono}</td>
+                    <td>${p.direccion}</td>
+                    <td>${p.fecha_nacimiento ? calcularEdad(p.fecha_nacimiento) : ''}</td>
+                `;
+
+                // 👉 Evento click en la fila
+                tr.addEventListener("click", function() {
+                    // Renderizar estructura base con tabs y formulario vacío
+                    document.getElementById("ContenidoDiv").innerHTML = `
+                        <div class="card shadow">
+                            <div class="card-body">
+                                <ul class="nav nav-tabs mb-3" id="myTab" role="tablist">
+                                    <li class="nav-item">
+                                        <a class="nav-link active" id="paciente-tab" data-toggle="tab" href="#paciente" role="tab">Paciente</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="antecedentes-tab" data-toggle="tab" href="#antecedentes" role="tab">Antecedentes Médico</a>
+                                    </li>
+                                </ul>
+                                <div class="tab-content" id="myTabContent">
+                                    <div class="tab-pane fade show active" id="paciente" role="tabpanel">
+                                       <div class="card mb-3 shadow-sm">
+                                            <div class="card-header bg-primary text-white" style="font-weight:bold;">
+                                                Información del Paciente
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-12 text-center mb-3">
+                                                        <h4 class="mb-3">${p.nombre} ${p.apellido_paterno} ${p.apellido_materno}</h4>
+                                                    </div>
+                                                    <div class="col-md-12" style="text-align:center; padding-bottom:15px;">
+                                                        ${p.imagen 
+                                                            ? `<img src="/storage/${p.imagen}" alt="Foto paciente" class="img-thumbnail shadow-sm" style="max-width:60%;">` 
+                                                            : `<div class="alert alert-secondary">Sin foto</div>`}
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <div class="row">
+                                                            <div class="col-md-4 mb-3">
+                                                                <label class="text-muted">CI</label>
+                                                                <div><strong>${p.ci}</strong></div>
+                                                            </div>
+                                                            <div class="col-md-4 mb-3">
+                                                                <label class="text-muted">Teléfono</label>
+                                                                <div><strong>${p.telefono}</strong></div>
+                                                            </div>
+                                                            <div class="col-md-4 mb-3">
+                                                                <label class="text-muted">Dirección</label>
+                                                                <div><strong>${p.direccion}</strong></div>
+                                                            </div>
+                                                            <div class="col-md-4 mb-3">
+                                                                <label class="text-muted">Fecha de nacimiento</label>
+                                                                <div><strong>${p.fecha_nacimiento}</strong></div>
+                                                            </div>
+                                                            <div class="col-md-4 mb-3">
+                                                                <label class="text-muted">Lugar de nacimiento</label>
+                                                                <div><strong>${p.lugar_nacimiento}</strong></div>
+                                                            </div>
+                                                            <div class="col-md-4 mb-3">
+                                                                <label class="text-muted">Ocupación</label>
+                                                                <div><strong>${p.ocupacion}</strong></div>
+                                                            </div>
+                                                            <div class="col-md-4 mb-3">
+                                                                <label class="text-muted">Estado civil</label>
+                                                                <div><strong>${p.estado_civil}</strong></div>
+                                                            </div>
+                                                            <div class="col-md-4 mb-3">
+                                                                <label class="text-muted">Sexo</label>
+                                                                <div><strong>${p.sexo}</strong></div>
+                                                            </div>
+                                                        </div>
+                                                    </div>                                            
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <!-- 🔹 Mostrar antecedentes médicos como texto -->
+                                        ${p.antecedente_medico ? `
+                                        <div class="card mb-3">
+                                            <div class="card-header bg-primary text-white">Antecedentes Médicos</div>
+                                            <div class="card-body">
+                                                <div class="card mb-3 shadow-sm">
+                                                    <div class="card-header" style="background-color:#EEEEEE;">
+                                                        Antecedentes Patológicos Familiares <strong>${p.antecedente_medico.antecedentes_familiares || 'No registrado'}</strong>
+                                                    </div>
+                                                </div>
+
+                                                <div class="card mb-3 shadow-sm">
+                                                    <div class="card-header" style="background-color:#EEEEEE; font-weight:bold;">
+                                                        Antecedentes Patológicos Personales
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="form-row">
+                                                            <div class="form-group col-md-3">
+                                                                <label>Anemia <strong>(${p.antecedente_medico.anemia ? 'Sí' : 'No'})</strong></label>
+                                                            </div>
+                                                            <div class="form-group col-md-3">
+                                                                <label>Asma <strong>(${p.antecedente_medico.asma ? 'Sí' : 'No'})</strong></label>
+                                                            </div>
+                                                            <div class="form-group col-md-3">
+                                                                <label>Cardiopatías <strong>(${p.antecedente_medico.cardiopatias ? 'Sí' : 'No'})</strong></label>
+                                                            </div>
+                                                            <div class="form-group col-md-3">
+                                                                <label>Diabetes <strong>(${p.antecedente_medico.diabetes ? 'Sí' : 'No'})</strong></label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-row">
+                                                            <div class="form-group col-md-3">
+                                                                <label>Epilepsia <strong>(${p.antecedente_medico.epilepsia ? 'Sí' : 'No'})</strong></label>
+                                                            </div>
+                                                            <div class="form-group col-md-3">
+                                                                <label>Hipertensión <strong>(${p.antecedente_medico.hipertension ? 'Sí' : 'No'})</strong></label>
+                                                            </div>
+                                                            <div class="form-group col-md-3">
+                                                                <label>Tuberculosis <strong>(${p.antecedente_medico.tuberculosis ? 'Sí' : 'No'})</strong></label>
+                                                            </div>
+                                                            <div class="form-group col-md-3">
+                                                                <label>VIH <strong>(${p.antecedente_medico.vih ? 'Sí' : 'No'})</strong></label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-row">
+                                                            <div class="form-group col-md-3">
+                                                                <label>Embarazo <strong>(${p.antecedente_medico.embarazo ? 'Sí' : 'No'})</strong></label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-row">
+                                                            <div class="form-group col-md-6">
+                                                                <label>Alergias <strong>${p.antecedente_medico.alergias || 'No registrado'}</strong></label>
+                                                            </div>
+                                                            <div class="form-group col-md-6">
+                                                                <label>Otros <strong>${p.antecedente_medico.otros || 'No registrado'}</strong></label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- 🔹 Tratamientos Médicos -->
+                                                <div class="card mb-3 shadow-sm">
+                                                    <div class="card-header" style="background-color:#EEEEEE; font-weight:bold;">
+                                                        Tratamientos Médicos
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="form-row">
+                                                            <div class="form-group">
+                                                                <label>¿Está en tratamiento médico?</label>
+                                                                <strong>(${p.antecedente_medico.en_tratamiento ? 'Sí' : 'No'})</strong>
+                                                            </div>
+                                                        </div>
+                                                         <div class="form-row">
+                                                            <div class="form-group">
+                                                                <label>¿Actualmente recibe algún tratamiento?</label>
+                                                                <strong>(${p.antecedente_medico.recibe_tratamiento ? 'Sí' : 'No'})</strong>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label>¿Tuvo hemorragia después de una extracción dental?</label>
+                                                            <strong>(${p.antecedente_medico.hemorragia_extraccion ? 'Sí' : 'No'})</strong>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+
+                                                <!-- 🔹 Antecedentes Bucodentales -->
+                                                <div class="card mb-3 shadow-sm">
+                                                    <div class="card-header" style="background-color:#EEEEEE; font-weight:bold;">
+                                                        Antecedentes Bucodentales
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="form-group">
+                                                            <label>Fecha de última visita al dentista (<strong>${p.antecedente_medico.ultima_visita || 'No registrado'}</strong>)</label>
+                                                        </div>
+                                                        <div class="form-row">
+                                                            <div class="form-group col-md-6">
+                                                                <label>¿Fuma? (<strong>${p.antecedente_medico.fuma ? 'Sí' : 'No'}</strong>)</label>
+                                                            </div>
+                                                            <div class="form-group col-md-6">
+                                                                <label>¿Bebe? (<strong>${p.antecedente_medico.bebe ? 'Sí' : 'No'}</strong>)</label>
+                                                            </div>
+                                                            <div class="form-group col-md-12">
+                                                                <label>¿Utiliza prótesis dental? (<strong>${p.antecedente_medico.protesis ? 'Sí' : 'No'}</strong>)</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- 🔹 Higiene Oral -->
+                                                <div class="card mb-3 shadow-sm">
+                                                    <div class="card-header" style="background-color:#EEEEEE; font-weight:bold;">
+                                                        Higiene Oral
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="form-row">
+                                                            <div class="form-group col-md-6">
+                                                                <label>¿Utiliza cepillo dental?(<strong>${p.antecedente_medico.cepillo ? 'Sí' : 'No'}</strong>)</label>
+                                                            </div>
+                                                            <div class="form-group col-md-6">
+                                                                <label>¿Utiliza hilo dental?(<strong>${p.antecedente_medico.hilo ? 'Sí' : 'No'}</strong>)</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-row">
+                                                            <div class="form-group col-md-6">
+                                                                <label>¿Utiliza enjuague bucal?(<strong>${p.antecedente_medico.enjuague ? 'Sí' : 'No'}</strong>)</label>
+                                                            </div>
+                                                             <div class="form-group col-md-6">
+                                                                <label>Frecuencia de cepillado (<strong>${p.antecedente_medico.frecuencia || 'No registrado'}</strong>)</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-row">
+                                                            <div class="form-group col-md-12">
+                                                                <label>¿al cepillarse le sangran las encías? (<strong>${p.antecedente_medico.sangrado ? 'Sí' : 'No'}</strong>)</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        ` : `
+                                        <div class="alert alert-warning">Este paciente aún no tiene antecedentes médicos registrados.</div>
+                                        `}
+                                    </div>
+
+                                    <div class="tab-pane fade" id="antecedentes" role="tabpanel">
+                                        <form id="formAntecedentes" data-id="${p.id}">
+                                            @csrf
+                                            <!-- 🔹 Antecedentes Patológicos Familiares -->
+                                            <div class="card mb-3 shadow-sm">
+                                                <div class="card-header" style="background-color:#EEEEEE; font-weight:bold;">
+                                                    Antecedentes Patológicos Familiares
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="form-group">
+                                                        <label>¿Tiene antecedentes familiares de enfermedades?</label>
+                                                        <input type="text" class="form-control" name="PatologicosFamiliares" placeholder="Ej: Diabetes, Hipertensión, etc." required>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- 🔹 Antecedentes Patológicos Personales -->
+                                            <div class="card mb-3 shadow-sm">
+                                                <div class="card-header" style="background-color:#EEEEEE; font-weight:bold;">
+                                                    Antecedentes Patológicos Personales
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="form-row">
+                                                        <div class="form-group col-md-4">
+                                                            <label>Anemia</label>
+                                                            <select class="form-control" name="anemia"><option>Si</option><option>No</option></select>
+                                                        </div>
+                                                        <div class="form-group col-md-4">
+                                                            <label>Asma</label>
+                                                            <select class="form-control" name="asma"><option>Si</option><option>No</option></select>
+                                                        </div>
+                                                        <div class="form-group col-md-4">
+                                                            <label>Cardiopatías</label>
+                                                            <select class="form-control" name="cardiopatias"><option>Si</option><option>No</option></select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-row">
+                                                        <div class="form-group col-md-4">
+                                                            <label>Diabetes</label>
+                                                            <select class="form-control" name="diabetes"><option>Si</option><option>No</option></select>
+                                                        </div>
+                                                        <div class="form-group col-md-4">
+                                                            <label>Epilepsia</label>
+                                                            <select class="form-control" name="epilepsia"><option>Si</option><option>No</option></select>
+                                                        </div>
+                                                        <div class="form-group col-md-4">
+                                                            <label>Hipertensión</label>
+                                                            <select class="form-control" name="hipertension"><option>Si</option><option>No</option></select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-row">
+                                                        <div class="form-group col-md-4">
+                                                            <label>Tuberculosis</label>
+                                                            <select class="form-control" name="tuberculosis"><option>Si</option><option>No</option></select>
+                                                        </div>
+                                                        <div class="form-group col-md-4">
+                                                            <label>VIH</label>
+                                                            <select class="form-control" name="vih"><option>Si</option><option>No</option></select>
+                                                        </div>
+                                                        <div class="form-group col-md-4">
+                                                            <label>Embarazo</label>
+                                                            <select class="form-control" name="embarazo"><option>Si</option><option>No</option></select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group mt-2">
+                                                        <label>Alergias</label>
+                                                        <input type="text" class="form-control" name="alergias" placeholder="Ej: Penicilina, polen...">
+                                                    </div>
+                                                    <div class="form-group mt-2">
+                                                        <label>Otros</label>
+                                                        <input type="text" class="form-control" name="otros" placeholder="Otros antecedentes">
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- 🔹 Tratamientos Médicos -->
+                                            <div class="card mb-3 shadow-sm">
+                                                <div class="card-header" style="background-color:#EEEEEE; font-weight:bold;">
+                                                    Tratamientos Médicos
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="form-row">
+                                                        <div class="form-group col-md-6">
+                                                            <label>¿Está en tratamiento médico?</label>
+                                                            <select class="form-control" name="en_tratamiento"><option>Si</option><option>No</option></select>
+                                                        </div>
+                                                        <div class="form-group col-md-6">
+                                                            <label>¿Actualmente recibe algún tratamiento?</label>
+                                                            <select class="form-control" name="recibe_tratamiento"><option>Si</option><option>No</option></select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>¿Tuvo hemorragia después de una extracción dental?</label>
+                                                        <select class="form-control" name="hemorragia"><option>Si</option><option>Inmediatamente</option><option>No</option></select>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- 🔹 Antecedentes Bucodentales -->
+                                            <div class="card mb-3 shadow-sm">
+                                                <div class="card-header" style="background-color:#EEEEEE; font-weight:bold;">
+                                                    Antecedentes Bucodentales
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="form-group">
+                                                        <label>Fecha de última visita al dentista</label>
+                                                        <input type="date" class="form-control" name="ultima_visita">
+                                                    </div>
+                                                    <div class="form-row">
+                                                        <div class="form-group col-md-4">
+                                                            <label>¿Fuma?</label>
+                                                            <select class="form-control" name="fuma"><option>Si</option><option>No</option></select>
+                                                        </div>
+                                                        <div class="form-group col-md-4">
+                                                            <label>¿Bebe?</label>
+                                                            <select class="form-control" name="bebe"><option>Si</option><option>No</option></select>
+                                                        </div>
+                                                        <div class="form-group col-md-4">
+                                                            <label>¿Utiliza prótesis dental?</label>
+                                                            <select class="form-control" name="protesis"><option>Si</option><option>No</option></select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- 🔹 Higiene Oral -->
+                                            <div class="card mb-3 shadow-sm">
+                                                <div class="card-header" style="background-color:#EEEEEE; font-weight:bold;">
+                                                    Higiene Oral
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="form-row">
+                                                        <div class="form-group col-md-4">
+                                                            <label>¿Utiliza cepillo dental?</label>
+                                                            <select class="form-control" name="cepillo"><option>Si</option><option>No</option></select>
+                                                        </div>
+                                                        <div class="form-group col-md-4">
+                                                            <label>¿Utiliza hilo dental?</label>
+                                                            <select class="form-control" name="hilo"><option>Si</option><option>No</option></select>
+                                                        </div>
+                                                        <div class="form-group col-md-4">
+                                                            <label>¿Utiliza enjuague bucal?</label>
+                                                            <select class="form-control" name="enjuague"><option>Si</option><option>No</option></select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-row">
+                                                        <div class="form-group col-md-6">
+                                                            <label>Frecuencia de cepillado</label>
+                                                            <select class="form-control" name="frecuencia">
+                                                                <option>1 vez al día</option>
+                                                                <option>2 veces al día</option>
+                                                                <option>3 veces al día</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="form-group col-md-6">
+                                                            <label>¿al cepillarse le sangran las encías?</label>
+                                                            <select class="form-control" name="sangrado"><option>Si</option><option>No</option></select>
+                                                        </div>
+                                            <div class="text-right mt-3">
+                                                <button type="submit" class="btn btn-success">Guardar Antecedentes</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    const form = document.getElementById("formAntecedentes");
+                    const pacienteId = p.id;
+
+                    // 🔥 Consultar antecedentes existentes
+                    fetch(`/pacientes/${pacienteId}/antecedentes-show`)
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data) {
+                                // Campos de texto
+                                const fields = {
+                                    PatologicosFamiliares: data.antecedentes_familiares,
+                                    otros: data.otros,
+                                    alergias: data.alergias,
+                                    ultima_visita: data.ultima_visita,
+                                    frecuencia: data.frecuencia
+                                };
+
+                                Object.keys(fields).forEach(name => {
+                                    const input = form.querySelector(`[name="${name}"]`);
+                                    if (input) input.value = fields[name] || '';
+                                });
+
+                                // Campos booleanos
+                                const booleanFields = [
+                                    'anemia','asma','cardiopatias','diabetes','epilepsia','hipertension',
+                                    'tuberculosis','vih','embarazo','en_tratamiento','recibe_tratamiento',
+                                    'hemorragia','fuma','bebe','protesis','cepillo','hilo','enjuague','sangrado'
+                                ];
+
+                                booleanFields.forEach(campo => {
+                                    const input = form.querySelector(`[name="${campo}"]`);
+                                    if (input) input.value = data[campo] ? 'Si' : 'No';
+                                });
+                            } else {
+                                console.log("Paciente sin antecedentes registrados");
+                            }
+                        });
+                });
+
+                tbody.appendChild(tr);
+            });
+
+            // 👉 Capturar envío del formulario
+            document.addEventListener("submit", function (e) {
+                if (e.target && e.target.id === "formAntecedentes") {
+                    e.preventDefault();
+
+                    const form = e.target;
+                    const formData = new FormData(form);
+                    const pacienteId = form.getAttribute("data-id");
+
+                    fetch(`/pacientes/${pacienteId}/antecedentes`, { 
+                        method: "POST",
+                        body: formData,
+                        headers: {
+                            "X-CSRF-TOKEN": document
+                                .querySelector('meta[name="csrf-token"]')
+                                .getAttribute('content'),
+                            "Accept": "application/json"
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert("✅ Guardado correctamente");
+                        } else {
+                            alert("❌ Error al guardar");
+                        }
+                    })
+                    .catch(error => {
+                        console.error(error);
+                    });
+                }
+            });
+        }
+
+
+        // 🔥 RENDER GRID
+        function renderGrid(data) {
+            gridUsuarios.innerHTML = "";
+
+            data.forEach(p => {
+
+                let imagen = p.imagen
+                    ? `/storage/${p.imagen}`
+                    : `/assets/avatars/default.jpg`;
+
+                gridUsuarios.innerHTML += `
+                    <div class="col-md-4 mb-3">
+                        <div class="card shadow mb-4">
+
+                            <div class="card-body text-center">
+
+                                <img src="${imagen}"
+                                    class="rounded-circle mt-3"
+                                    style="width:90px;height:90px;object-fit:cover;">
+
+                                <div class="mt-2">
+                                    <strong>${p.nombre} ${p.apellido_paterno}</strong>
+                                    <p class="small text-muted mb-0">CI: ${p.ci}</p>
+                                    <p class="small">
+                                        <span class="badge badge-light">${p.direccion}</span>
+                                    </p>
+                                    <p class="small text-muted">
+                                        Edad: ${p.fecha_nacimiento ? calcularEdad(p.fecha_nacimiento) : ''}
+                                    </p>
+                                </div>
+
+                            </div>
+
+                            <div class="card-footer">
+                                <div class="d-flex justify-content-between align-items-center">
+
+                                    <small>
+                                        <span class="dot dot-lg bg-success mr-1"></span> Activo
+                                    </small>
+
+                                    <div class="dropdown">
+                                        <button class="btn btn-link p-0 text-muted" data-toggle="dropdown">
+                                            ⋮
+                                        </button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item" href="#">Ver</a>
+                                            <a class="dropdown-item" href="#">Editar</a>
+                                            <a class="dropdown-item text-danger" href="#">Eliminar</a>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // 🔥 LIST BUTTON
+        btnList.addEventListener("click", function(e) {
+            e.preventDefault();
+
+            listUsuarios.classList.remove("d-none");
+            gridUsuarios.classList.add("d-none");
+
+            cargarPacientes().then(renderLista);
+        });
+
+        // 🔥 GRID BUTTON
+        btnGrid.addEventListener("click", function(e) {
+            e.preventDefault();
+
+            listUsuarios.classList.add("d-none");
+            gridUsuarios.classList.remove("d-none");
+
+            cargarPacientes().then(renderGrid);
+        });
+
+        // 🔥 🔥 FIX REAL BOOTSTRAP TAB (ESTO ES LO QUE TE FALTABA)
+        $(document).on('shown.bs.tab', function (e) {
+
+            const target = $(e.target).attr("href");
+
+            if (target === "#profile") {
+
+                listUsuarios.classList.remove("d-none");
+                gridUsuarios.classList.add("d-none");
+
+                cargarPacientes().then(renderLista);
+            }
+        });
 
     });
 </script>

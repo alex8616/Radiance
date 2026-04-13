@@ -6,13 +6,15 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('pacientes', function (Blueprint $table) {
             $table->id();
+
+            // 🔥 quién registró el paciente
+            $table->foreignId('created_by')
+                  ->constrained('users')
+                  ->cascadeOnDelete();
 
             $table->string('nombre', 100);
             $table->string('apellido_paterno', 100);
@@ -28,13 +30,11 @@ return new class extends Migration
             $table->string('estado_civil', 50)->nullable();
             $table->string('sexo', 10)->nullable();
 
+            $table->string('imagen')->nullable();
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('pacientes');

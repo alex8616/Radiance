@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('tratamientos_paciente', function (Blueprint $table) {
@@ -18,7 +15,11 @@ return new class extends Migration
             $table->foreignId('doctor_id')->constrained('doctores')->cascadeOnDelete();
             $table->foreignId('sucursal_id')->constrained('sucursales')->cascadeOnDelete();
 
-            $table->string('nombre_tratamiento', 150);
+            // 🔥 RELACIÓN CORRECTA
+            $table->foreignId('categoria_id')
+                  ->constrained('categorias_tratamientos')
+                  ->cascadeOnDelete();
+
             $table->text('descripcion')->nullable();
 
             $table->date('fecha_inicio')->nullable();
@@ -27,17 +28,14 @@ return new class extends Migration
             $table->decimal('costo_total', 10, 2)->nullable();
 
             $table->enum('estado', ['activo', 'finalizado', 'cancelado'])
-                ->default('activo');
+                  ->default('activo');
 
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('tratamiento_pacientes');
+        Schema::dropIfExists('tratamientos_paciente'); // 🔥 corregido
     }
 };
