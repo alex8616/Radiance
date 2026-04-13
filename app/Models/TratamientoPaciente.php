@@ -40,4 +40,10 @@ class TratamientoPaciente extends Model
     {
         return $this->belongsTo(CategoriaTratamiento::class, 'categoria_id');
     }
+
+    public function sesiones()
+    {
+        return $this->hasMany(SesionTratamiento::class, 'tratamiento_id')
+                    ->orderBy('fecha', 'asc');
+    }
 }

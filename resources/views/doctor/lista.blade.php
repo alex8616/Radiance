@@ -17,7 +17,7 @@
             <div class="tab-content" id="myTabContent">
                 <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab"> 
                     <div class="row">
-                        <div class="col-md-5 bg-light" style="padding: 15px;">
+                        <div class="col-md-7 bg-light" style="padding: 15px;">
                             <div class="w-20 mx-auto text-center justify-content-center py-8 my-8">
                                 <h2 class="page-title mb-0" style="padding: 15px">Buscar Paciente (C.I, Nombre)</h2>  
                                 <form class="searchform searchform-lg">
@@ -29,7 +29,7 @@
                             </div>
                         </div>
 
-                        <div class="col-md-7 bg-light" style="padding: 15px;">
+                        <div class="col-md-5 bg-light" style="padding: 15px;">
                             <div class="card shadow" id="ContenidoDivPaciente" style="padding: 15px;">
                             </div>
                         </div>
@@ -232,19 +232,97 @@
                     const div = document.getElementById("DivTratamiento");
 
                     if (data.length > 0) {
-                        let html = `<h6>Tratamientos en proceso</h6>`;
-                        data.forEach(t => {
+                        let html = ``;
+                        data.forEach((t, index) => {
+                            let estadoHTML = '';
+                            let duracion = calcularDuracion(t.fecha_inicio, t.fecha_fin_estimada);
+
+                            // 🔥 estado
+                            if (t.estado === 'activo') {
+                                estadoHTML = `<span class="text-success">
+                                    <i class="fas fa-circle mr-1" style="font-size:10px;"></i> En proceso
+                                </span>`;
+                            } else if (t.estado === 'finalizado') {
+                                estadoHTML = `<span class="text-primary">
+                                    <i class="fas fa-circle mr-1" style="font-size:10px;"></i> Finalizado
+                                </span>`;
+                            } else if (t.estado === 'cancelado') {
+                                estadoHTML = `<span class="text-danger">
+                                    <i class="fas fa-circle mr-1" style="font-size:10px;"></i> Cancelado
+                                </span>`;
+                            }
+
+                            // 🔥 sesiones
+                            let sesionesHTML = '';
+
+                            if (t.sesiones && t.sesiones.length > 0) {
+
+                                t.sesiones.forEach(s => {
+                                    sesionesHTML += `
+                                        <div class="border-left pl-3 mb-3">
+                                            <div class="text-muted small">
+                                                <i class="fas fa-calendar-alt mr-1"></i> ${s.fecha ?? '-'}
+                                            </div>
+
+                                            <div>
+                                                ${s.descripcion ?? ''}
+                                            </div>
+
+                                            <div class="text-muted small">
+                                                Observación: ${s.observaciones ?? '-'}
+                                            </div>
+                                        </div>
+                                    `;
+                                });
+
+                            } else {
+                                sesionesHTML = `
+                                    <hr>
+                                    <div class="text-muted text-center">
+                                        No hay sesiones registradas
+                                    </div>
+                                `;
+                            }
+
+                            // 🔥 render final
                             html += `
-                                <div class="card mb-2 shadow-sm">
-                                    <div class="card-body">
-                                        <p><strong>Nombre:</strong> ${t.categoria?.nombre }</p>
-                                        <p><strong>Descripción:</strong> ${t.descripcion}</p>
-                                        <p><strong>Fecha inicio:</strong> ${t.fecha_inicio}</p>
-                                        <p><strong>Fecha fin estimada:</strong> ${t.fecha_fin_estimada}</p>
-                                        <p><strong>Costo total:</strong> ${t.costo_total}</p>
-                                        <p><strong>Estado:</strong> ${t.estado}</p>
+                            <div class="row mb-2">
+                                <div class="col-md-12">
+                                    <div class="accordion w-100" id="accordion${index}">
+                                        <div class="card shadow">
+                                            
+                                            <!-- HEADER -->
+                                            <div class="card-header" id="heading${index}">
+                                                <a role="button" data-toggle="collapse" href="#collapse${index}">
+                                                    <div class="d-flex justify-content-between align-items-center w-100">
+                                                        <strong>${t.categoria?.nombre ?? 'Sin categoría'}</strong>
+                                                        ${estadoHTML}
+                                                    </div>
+                                                </a>
+                                            </div>
+
+                                            <!-- BODY -->
+                                            <div id="collapse${index}" class="collapse show" data-parent="#accordion${index}">
+                                                <div class="card-body"> 
+                                                    
+                                                    ${t.descripcion ?? ''} <br><br>
+
+                                                    Inicio <strong>${t.fecha_inicio ?? '-'}</strong> 
+                                                    Hasta <strong>${t.fecha_fin_estimada ?? '-'}</strong> 
+                                                    (${duracion}) <br><br>
+
+                                                    COSTO DEL TRATAMIENTO: 
+                                                    <strong>${t.costo_total ?? 0} Bs.</strong>
+
+                                                    ${sesionesHTML}
+
+                                                </div>
+                                            </div>
+
+                                        </div>
                                     </div>
                                 </div>
+                            </div>
                             `;
                         });
                         div.innerHTML = html;
@@ -1137,6 +1215,34 @@
                     <span class="mt-3 text-muted h5">En espera</span>
                 </div>
             `;
+    }
+</script>
+<script>
+    function calcularDuracion(inicio, fin) {
+        if (!inicio || !fin) return '-';
+        const fechaInicio = new Date(inicio);
+        const fechaFin = new Date(fin);
+        if (isNaN(fechaInicio) || isNaN(fechaFin)) return '-';
+        let años = fechaFin.getFullYear() - fechaInicio.getFullYear();
+        let meses = fechaFin.getMonth() - fechaInicio.getMonth();
+        let dias = fechaFin.getDate() - fechaInicio.getDate();
+        if (dias < 0) {
+            meses--;
+            dias += 30; 
+        }
+
+        if (meses < 0) {
+            años--;
+            meses += 12;
+        }
+
+        let resultado = '';
+
+        if (años > 0) resultado += `${años} año(s) `;
+        if (meses > 0) resultado += `${meses} mes(es) `;
+        if (dias > 0) resultado += `${dias} día(s)`;
+
+        return resultado || '0 días';
     }
 </script>
 @endsection

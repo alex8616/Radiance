@@ -150,6 +150,8 @@ class PacienteController extends Controller
     public function PacientesTratamientos($pacienteId){
         $tratamientos = TratamientoPaciente::where('paciente_id', $pacienteId)
             ->with('categoria')
+            ->with('paciente')
+            ->with('sesiones')
             ->get();
 
         return response()->json($tratamientos);

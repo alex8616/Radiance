@@ -14,14 +14,9 @@ return new class extends Migration
         Schema::create('sesiones_tratamiento', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('tratamiento_id')
-                ->constrained('tratamientos_paciente')
-                ->cascadeOnDelete();
+            $table->foreignId('tratamiento_id')->constrained('tratamientos_paciente')->cascadeOnDelete();
 
-            $table->foreignId('cita_id')
-                ->nullable()
-                ->constrained('citas')
-                ->nullOnDelete();
+            $table->foreignId('cita_id')->nullable()->constrained('citas')->nullOnDelete();
 
             $table->date('fecha')->nullable();
 
