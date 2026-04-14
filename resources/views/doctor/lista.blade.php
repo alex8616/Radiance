@@ -100,6 +100,61 @@
         </div>
     </div>    
 </div>
+
+<div class="modal fade" id="ModalAdelantoTratamiento" tabindex="-1" role="dialog" aria-labelledby="ModalAdelantoTratamientoTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ModalAdelantoTratamientoTitle">Registrar Adelanto</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="card border-secondary">
+                    <div class="card-header d-flex justify-content-between align-items-center bg-light">
+                        <span class="font-weight-bold">PAGO</span>
+                        <button type="button" class="btn btn-sm btn-info" id="btnAgregarFilaPago">
+                            <i class="fas fa-plus"></i> +
+                        </button>
+                    </div>
+                    <div class="card-body p-2" style="background-color: #f8f9fa;">
+                        <div class="d-flex align-items-center mb-2" style="gap: 8px;">
+                            <div style="flex: 2;">
+                                <select class="form-control form-control-sm" name="metodo_pago[]">
+                                    <option value="efectivo">Efectivo</option>
+                                    <option value="transferencia">Transferencia</option>
+                                    <option value="qr">QR</option>
+                                </select>
+                            </div>
+                            
+                            <div class="font-weight-bold">Bs.</div>
+                            
+                            <div style="flex: 1;">
+                                <input type="number" class="form-control form-control-sm text-right" 
+                                       name="monto_pago[]" value="0.00" step="0.01">
+                            </div>
+                            
+                            <button type="button" class="btn btn-sm btn-outline-danger">
+                                <i class="fas fa-times"></i> x
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-footer py-2 bg-light">
+                        <div class="d-flex justify-content-between">
+                            <span class="font-weight-bold">Cambio:</span>
+                            <span id="txtCambio">0.00 Bs.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn mb-2 btn-secondary" data-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn mb-2 btn-primary" id="btnConfirmarAdelanto">Confirmar</button>
+            </div>
+        </div>
+    </div>
+</div>
 <script src="{{ asset('js/utilidades.js') }}"></script>
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -215,8 +270,27 @@
         });
 
         $(document).on("click", ".btnVerPaciente", function() {
+            // 1. Obtener los datos del botón seleccionado
             const pacienteId = $(this).data("id");
-    
+            const nombreCompleto = $(this).data("nombre") + " " + $(this).data("apellido-paterno") + " " + $(this).data("apellido-materno");
+            const ci = $(this).data("ci");
+            
+            // 2. Limpiar la lista de resultados de búsqueda
+            $("#DivResultadoPaciente").html("");
+
+            // 4. Renderizar la vista del paciente seleccionado
+            $("#DivResultadoPaciente").html(`
+                <div class="alert alert-info d-flex justify-content-between align-items-center shadow-sm">
+                    <div>
+                        <i class="fas fa-user-circle fa-lg mr-2"></i>
+                        <strong style="font-size: 14px; color: black">${nombreCompleto}</strong> - <strong style="font-size: 14px; color: black">${ci}</strong> 
+                    </div>
+                </div>
+            `);
+            
+            // 3. (Opcional) Limpiar o esconder el input de búsqueda
+            $("#buscarPaciente").val("");
+            
             $("#ContenidoDivPaciente").html(`
                 <div class="card shadow-sm">
                     <div class="card-header d-flex justify-content-between align-items-center">
@@ -289,9 +363,15 @@
                                                     COSTO DEL TRATAMIENTO: 
                                                     <strong>${t.costo_total ?? 0} Bs.</strong> <br><br>
 
-                                                    <a href="#" class="btn btn-sm btn-outline-primary" id="btnVerTratamiento" data-paciente-id="${t.id}">
-                                                        Ver Tratamiento
-                                                    </a>
+                                                    <div class="d-flex justify-content-between align-items-center w-100">
+                                                        <a href="#" class="btn btn-sm btn-outline-primary" id="btnVerTratamiento" data-paciente-id="${t.id}">
+                                                            Ver Tratamiento
+                                                        </a>
+
+                                                        <a href="#" class="btn btn-sm btn-link" id="btnAdelanto" data-paciente-id="${t.id}" data-toggle="modal" data-target="#ModalAdelantoTratamiento">
+                                                            Adelanto
+                                                        </a>
+                                                    </div>
                                                 </div>
                                             </div>
 
