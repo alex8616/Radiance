@@ -6,6 +6,8 @@ use App\Http\Controllers\SucursalController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\PacienteController;
 use App\Http\Controllers\TratamientoPacienteController;
+use App\Http\Controllers\SesionTratamientoController;
+use App\Http\Controllers\FirmaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -101,3 +103,14 @@ Route::get('/pacientes/{paciente}/antecedentes-show', [PacienteController::class
 Route::get('/pacientes/{paciente}/tratamientos', [PacienteController::class, 'PacientesTratamientos'])->name('pacientes.tratamientos');
 Route::get('/categoria-get', [TratamientoPacienteController::class, 'GetCategorias']);
 Route::post('/pacientes/{paciente}/crear-tratamientos', [TratamientoPacienteController::class, 'CrearTratamiento']);
+Route::get('/tratamiento/{tratamiento}/sesiones', [TratamientoPacienteController::class, 'GetTratamientoSesion']);
+Route::post('/tratamiento/{tratamiento}/sesiones', [SesionTratamientoController::class, 'CrearSesion']);
+
+/*
+|--------------------------------------------------------------------------
+| firma digital
+|--------------------------------------------------------------------------
+*/
+Route::post('/generar-token-firma', [FirmaController::class, 'generarToken']);
+Route::get('/firmar/{token}', [FirmaController::class, 'verFormulario']);
+Route::post('/guardar-firma', [FirmaController::class, 'guardarFirma']);

@@ -16,12 +16,16 @@ return new class extends Migration
 
             $table->foreignId('tratamiento_id')->constrained('tratamientos_paciente')->cascadeOnDelete();
 
-            $table->foreignId('cita_id')->nullable()->constrained('citas')->nullOnDelete();
-
             $table->date('fecha')->nullable();
+            $table->date('fecha_atencion')->nullable();
 
-            $table->text('descripcion')->nullable();
             $table->text('observaciones')->nullable();
+
+            $table->text('analisis')->nullable();
+            $table->text('plan_accion')->nullable();
+            $table->decimal('costo', 10, 2)->nullable();
+            $table->decimal('saldo', 10, 2)->nullable();
+            $table->string('firma')->nullable();
 
             $table->timestamps();
         });
@@ -32,6 +36,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('sesion_tratamientos');
+        Schema::dropIfExists('sesiones_tratamiento'); // corregido
     }
 };

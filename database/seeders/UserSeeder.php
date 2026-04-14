@@ -19,5 +19,14 @@ class UserSeeder extends Seeder
             'ci' => '12345678',
             'celular' => '70000001',
         ]);
+
+        User::create([
+            'name' => 'Doctor',
+            'email' => 'ale@gmail.com',
+            'password' => Hash::make('123456789'),
+            'role' => 'doctor',
+            'ci' => '12345679',
+            'celular' => '70000002',
+        ]);
     }
 }

@@ -10,10 +10,14 @@ class SesionTratamiento extends Model
 
     protected $fillable = [
         'tratamiento_id',
-        'cita_id',
         'fecha',
-        'descripcion',
-        'observaciones'
+        'fecha_atencion',
+        'observaciones',
+        'analisis',
+        'plan_accion',
+        'costo',
+        'saldo',
+        'firma'
     ];
 
     public function tratamiento()
@@ -21,8 +25,4 @@ class SesionTratamiento extends Model
         return $this->belongsTo(TratamientoPaciente::class, 'tratamiento_id');
     }
 
-    public function cita()
-    {
-        return $this->belongsTo(Cita::class);
-    }
 }

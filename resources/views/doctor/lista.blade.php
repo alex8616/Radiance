@@ -17,7 +17,7 @@
             <div class="tab-content" id="myTabContent">
                 <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab"> 
                     <div class="row">
-                        <div class="col-md-7 bg-light" style="padding: 15px;">
+                        <div class="col-md-12 bg-light" style="padding: 15px;">
                             <div class="w-20 mx-auto text-center justify-content-center py-8 my-8">
                                 <h2 class="page-title mb-0" style="padding: 15px">Buscar Paciente (C.I, Nombre)</h2>  
                                 <form class="searchform searchform-lg">
@@ -27,14 +27,20 @@
                                 <div id="DivResultadoPaciente" class="mt-4">
                                 
                             </div>
-                        </div>
-
-                        <div class="col-md-5 bg-light" style="padding: 15px;">
+                        </div>                        
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 bg-light" style="padding: 15px;">
                             <div class="card shadow" id="ContenidoDivPaciente" style="padding: 15px;">
                             </div>
                         </div>
-                    </div>                    
+                        <div class="col-md-8 bg-light">
+                            <div class="card shadow" id="DivSesionTratamiento">
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
                 <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab"> 
                     <div class="row">
                         <div class="col-md-7 bg-light" style="padding: 15px;">
@@ -42,7 +48,7 @@
                                 <div class="card-body">
                                     <!-- Encabezado con botones -->
                                     <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <h5 class="card-title mb-0">Usuarios</h5>
+                                        <h5 class="card-title mb-0">Paciente</h5>
                                         <div class="d-flex align-items-center">
                                             <a href="#" class="btn btn-outline-primary mr-2" id="bntListPaciente">
                                                 <span class="fe-list"></span>
@@ -97,6 +103,7 @@
 <script src="{{ asset('js/utilidades.js') }}"></script>
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
     $(document).ready(function () {
@@ -252,38 +259,6 @@
                                 </span>`;
                             }
 
-                            // 🔥 sesiones
-                            let sesionesHTML = '';
-
-                            if (t.sesiones && t.sesiones.length > 0) {
-
-                                t.sesiones.forEach(s => {
-                                    sesionesHTML += `
-                                        <div class="border-left pl-3 mb-3">
-                                            <div class="text-muted small">
-                                                <i class="fas fa-calendar-alt mr-1"></i> ${s.fecha ?? '-'}
-                                            </div>
-
-                                            <div>
-                                                ${s.descripcion ?? ''}
-                                            </div>
-
-                                            <div class="text-muted small">
-                                                Observación: ${s.observaciones ?? '-'}
-                                            </div>
-                                        </div>
-                                    `;
-                                });
-
-                            } else {
-                                sesionesHTML = `
-                                    <hr>
-                                    <div class="text-muted text-center">
-                                        No hay sesiones registradas
-                                    </div>
-                                `;
-                            }
-
                             // 🔥 render final
                             html += `
                             <div class="row mb-2">
@@ -312,10 +287,11 @@
                                                     (${duracion}) <br><br>
 
                                                     COSTO DEL TRATAMIENTO: 
-                                                    <strong>${t.costo_total ?? 0} Bs.</strong>
+                                                    <strong>${t.costo_total ?? 0} Bs.</strong> <br><br>
 
-                                                    ${sesionesHTML}
-
+                                                    <a href="#" class="btn btn-sm btn-outline-primary" id="btnVerTratamiento" data-paciente-id="${t.id}">
+                                                        Ver Tratamiento
+                                                    </a>
                                                 </div>
                                             </div>
 
@@ -335,6 +311,174 @@
                     document.getElementById("DivTratamiento").innerHTML = `<div class="alert alert-danger">Error al cargar tratamientos.</div>`;
                 });
             });
+
+            // Escuchar el click en el botón
+            $(document).on("click", "#btnVerTratamiento", function(e) {
+                e.preventDefault();
+
+                const tratamientoId = $(this).data("paciente-id");
+
+                // Petición AJAX a tu ruta Laravel
+                $.ajax({
+                    url: `/tratamiento/${tratamientoId}/sesiones`,
+                    type: "GET",
+                    dataType: "json",
+                    success: function(data) {
+                        let sesiones = data.sesiones;
+                        let html = `
+                            <div class="card shadow-sm">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">Sesiones del tratamiento</h5>
+                                    <a href="#" class="btn btn-sm btn-outline-primary" id="btnAgregarSesionTratamiento" data-tratamiento-id="${data.id}">
+                                        Agregar Sesión
+                                    </a>
+                                </div>
+                                <div class="card-body" id="CrearDivSesion">
+
+                                <div class="card-body" id="DivSesion">
+                        `;
+
+                        if (sesiones && sesiones.length > 0) {                         
+
+                            html += `<ul class="list-group">`;
+                            sesiones.forEach(function(s) {
+                                let botonFirma = s.firma 
+                                ? `<img src="/storage/${s.firma}" width="120"/>`
+                                : `<a href="#" class="btn mb-2 btn-link btnFirmar" data-id="${s.id}">¿Quieres Firmar?</a>`
+
+                                html += `
+                                    <table class="table table-bordered" style="width:100%;">
+                                        <tr>
+                                            <th style="width:60%;">
+                                                <strong>FECHA DE ATENCION:</strong> ${s.fecha_atencion} <br><br>
+                                                <strong>ANALISIS:</strong> ${s.analisis} <br><br>
+                                                <strong>PLAN DE ACCION:</strong> ${s.plan_accion} <br><br>
+                                            </th>
+
+                                            <th style="width:10%;">${s.saldo} Bs.</th>
+
+                                            <th style="width:10%;">${s.saldo} Bs.</th>
+
+                                            <td style="width:20%;">${botonFirma}</td>
+                                        </tr>
+                                    </table>
+                                `;
+                            });
+                            html += `</ul>`;
+                        } else {
+                            html += `<p>No hay sesiones registradas.</p>`;
+                        }
+
+                        html += `
+                                </div>
+                            </div>
+                        `;
+
+                        // Insertar en el div
+                        $("#DivSesionTratamiento").html(html);
+
+                        $(document).on("click", ".btnFirmar", function(e){
+                            e.preventDefault();
+
+                            let sesionId = $(this).data("id");
+                            let $td = $(this).closest("td"); // 👈 agarramos la celda
+
+                            $.post("/generar-token-firma", { sesion_id: sesionId }, function(resp){
+
+                                let urlFirma = resp.url;
+
+                                let qrHtml = `
+                                    <div class="text-center">
+                                        <div class="qrcode"></div>
+                                    </div>
+                                `;
+
+                                // 👇 SOLO reemplaza ese td
+                                $td.html(qrHtml);
+
+                                // 👇 generar QR dentro de ese td
+                                new QRCode($td.find(".qrcode")[0], {
+                                    text: urlFirma,
+                                    width: 120,
+                                    height: 120
+                                });
+
+                            });
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        alert("Error al obtener las sesiones: " + error);
+                    }
+                });
+
+            });
+
+            // Delegar el evento porque el botón se genera dinámicamente
+            $(document).on("click", "#btnAgregarSesionTratamiento", function(e) {
+                e.preventDefault();
+
+                let tratamientoId = $(this).data("tratamiento-id");
+
+                // Construir el formulario
+                let formHtml = `
+                    <form id="formNuevaSesion" data-tratamiento-id="${tratamientoId}">
+                        <div class="mb-3">
+                            <label for="fechaAtencion" class="form-label">Fecha de atención</label>
+                            <input type="date" class="form-control" id="fechaAtencion" name="fechaAtencion" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="analisis" class="form-label">Análisis</label>
+                            <input type="text" class="form-control" id="analisis" name="analisis" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="planAccion" class="form-label">Plan de acción</label>
+                            <textarea class="form-control" id="planAccion" name="planAccion" required></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="costo" class="form-label">Costo</label>
+                                <input type="number" step="0.01" class="form-control" id="costo" name="costo" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="saldo" class="form-label">Saldo</label>
+                                <input type="number" step="0.01" class="form-control" id="saldo" name="saldo" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success">Guardar Sesión</button>
+                    </form>
+                `;
+
+                // Insertar en el div
+                $("#CrearDivSesion").html(formHtml);
+
+                $(document).on("submit", "#formNuevaSesion", function(e) {
+                    e.preventDefault();
+
+                    let tratamientoId = $(this).data("tratamiento-id");
+                    let formData = $(this).serialize();
+
+                    $.ajax({
+                        url: `/tratamiento/${tratamientoId}/sesiones`,
+                        type: "POST",
+                        data: formData,
+                        success: function(response) {
+                            alert(response.message);
+                        },
+                        error: function(xhr) {
+                            alert("Error al guardar la sesión: " + xhr.responseText);
+                        }
+                    });
+                });
+
+            });
+
+            // Función para volver al buscador
+            function volverBuscador() {
+                $("#DivBuscador").removeClass("d-none");
+                $("#DivPaciente").addClass("d-none");
+                $("#ContenidoDivPaciente").html("");
+            }
+
 
             // 🔹 CLICK: Renderiza el formulario
             $(document).on("click", "#btnAgregarTratamiento", function() {
