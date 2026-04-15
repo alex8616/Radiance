@@ -8,6 +8,7 @@ use App\Http\Controllers\PacienteController;
 use App\Http\Controllers\TratamientoPacienteController;
 use App\Http\Controllers\SesionTratamientoController;
 use App\Http\Controllers\FirmaController;
+use App\Http\Controllers\PagoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -114,3 +115,4 @@ Route::post('/tratamiento/{tratamiento}/sesiones', [SesionTratamientoController:
 Route::post('/generar-token-firma', [FirmaController::class, 'generarToken']);
 Route::get('/firmar/{token}', [FirmaController::class, 'verFormulario']);
 Route::post('/guardar-firma', [FirmaController::class, 'guardarFirma']);
+Route::post('/pagos/adelanto', [PagoController::class, 'guardarAdelanto']);

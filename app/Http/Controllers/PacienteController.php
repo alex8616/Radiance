@@ -149,12 +149,16 @@ class PacienteController extends Controller
 
     public function PacientesTratamientos($pacienteId){
         $tratamientos = TratamientoPaciente::where('paciente_id', $pacienteId)
-            ->with('categoria')
-            ->with('paciente')
-            ->with('sesiones')
-            ->get();
+                        ->with([
+                            'categoria',
+                            'paciente',
+                            'sesiones',
+                            'sesiones.pagos',
+                            'pagos' 
+                        ])
+                        ->get();
 
-        return response()->json($tratamientos);
+                    return response()->json($tratamientos);
     }
 
 }

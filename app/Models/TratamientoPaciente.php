@@ -46,4 +46,10 @@ class TratamientoPaciente extends Model
         return $this->hasMany(SesionTratamiento::class, 'tratamiento_id')
                     ->orderBy('fecha', 'asc');
     }
+    
+    public function pagos()
+    {
+        return $this->hasMany(Pago::class, 'tratamiento_id');
+    }
+    
 }

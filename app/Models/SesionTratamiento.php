@@ -25,4 +25,16 @@ class SesionTratamiento extends Model
         return $this->belongsTo(TratamientoPaciente::class, 'tratamiento_id');
     }
 
+    public function pagos()
+    {
+        return $this->hasMany(Pago::class, 'sesion_id');
+    }
+
+    public function productos()
+    {
+        return $this->belongsToMany(Producto::class, 'sesion_producto')
+            ->withPivot('cantidad', 'precio')
+            ->withTimestamps();
+    }
+
 }

@@ -104,54 +104,56 @@
 <div class="modal fade" id="ModalAdelantoTratamiento" tabindex="-1" role="dialog" aria-labelledby="ModalAdelantoTratamientoTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="ModalAdelantoTratamientoTitle">Registrar Adelanto</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="card border-secondary">
-                    <div class="card-header d-flex justify-content-between align-items-center bg-light">
-                        <span class="font-weight-bold">PAGO</span>
-                        <button type="button" class="btn btn-sm btn-info" id="btnAgregarFilaPago">
-                            <i class="fas fa-plus"></i> +
-                        </button>
-                    </div>
-                    <div class="card-body p-2" style="background-color: #f8f9fa;">
-                        <div class="d-flex align-items-center mb-2" style="gap: 8px;">
-                            <div style="flex: 2;">
-                                <select class="form-control form-control-sm" name="metodo_pago[]">
-                                    <option value="efectivo">Efectivo</option>
-                                    <option value="transferencia">Transferencia</option>
-                                    <option value="qr">QR</option>
-                                </select>
-                            </div>
-                            
-                            <div class="font-weight-bold">Bs.</div>
-                            
-                            <div style="flex: 1;">
-                                <input type="number" class="form-control form-control-sm text-right" 
-                                       name="monto_pago[]" value="0.00" step="0.01">
-                            </div>
-                            
-                            <button type="button" class="btn btn-sm btn-outline-danger">
-                                <i class="fas fa-times"></i> x
-                            </button>
+        <div class="modal-header">
+            <h5 class="modal-title">Registrar Adelanto</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="card shadow">
+
+                <div class="card-header d-flex justify-content-between align-items-center" style="background: #2E383F">
+                    <h5 class="mb-0" style="color: white">Pagos</h5>
+                    <a href="#" class="btn btn-sm btn-outline-primary" id="btnAgregarPagos">+</a>
+                </div>
+
+                <div id="contenedorPagos">
+                    <div class="row pago-item" style="padding: 15px">
+                        
+                        <div class="col-md-7">
+                            <select class="form-control metodo">
+                                <option value="efectivo">Efectivo</option>
+                                <option value="qr">QR/Deposito</option>
+                                <option value="tarjeta">Tarjeta</option>
+                            </select>
                         </div>
-                    </div>
-                    <div class="card-footer py-2 bg-light">
-                        <div class="d-flex justify-content-between">
-                            <span class="font-weight-bold">Cambio:</span>
-                            <span id="txtCambio">0.00 Bs.</span>
+
+                        <div class="col-md-3">
+                            <input class="form-control form-control-sm monto" type="number" value="0">
                         </div>
+
+                        <div class="col-md-2">
+                            <a href="#" class="btn btn-sm btn-outline-danger btnEliminarPago">X</a>
+                        </div>
+
                     </div>
                 </div>
+
+                <div class="card-header d-flex justify-content-between align-items-center" style="background: #2E383F">
+                    <h5 class="mb-0" style="color: white">
+                        Total: <span id="totalPagos">0</span>
+                    </h5>
+                </div>
+
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn mb-2 btn-secondary" data-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn mb-2 btn-primary" id="btnConfirmarAdelanto">Confirmar</button>
-            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn mb-2 btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" id="btnGuardarPagos" class="btn btn-primary">
+                Registrar Adelanto
+            </button>
+        </div>
         </div>
     </div>
 </div>
@@ -160,6 +162,140 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const contenedor = document.getElementById("contenedorPagos");
+        const btnAgregar = document.getElementById("btnAgregarPagos");
+        const totalSpan = document.getElementById("totalPagos");
+
+        // 👉 Agregar nueva fila
+        btnAgregar.addEventListener("click", function (e) {
+            e.preventDefault();
+
+            const nuevaFila = document.createElement("div");
+            nuevaFila.classList.add("row", "pago-item");
+            nuevaFila.style.padding = "15px";
+
+            nuevaFila.innerHTML = `
+                <div class="col-md-7">
+                    <select class="form-control">
+                        <option value="efectivo">Efectivo</option>
+                        <option value="qr">QR/Deposito</option>
+                        <option value="tarjeta">Tarjeta</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <input class="form-control form-control-sm monto" type="number" value="0">
+                </div>
+                <div class="col-md-2">
+                    <a href="#" class="btn btn-sm btn-outline-danger btnEliminarPago">X</a>
+                </div>
+            `;
+
+            contenedor.appendChild(nuevaFila);
+        });
+
+        // 👉 Eliminar fila (pero dejar al menos una)
+        contenedor.addEventListener("click", function (e) {
+            if (e.target.classList.contains("btnEliminarPago")) {
+                e.preventDefault();
+
+                const filas = document.querySelectorAll(".pago-item");
+
+                if (filas.length > 1) {
+                    e.target.closest(".pago-item").remove();
+                    calcularTotal();
+                } else {
+                    alert("Debe existir al menos un pago");
+                }
+            }
+        });
+
+        // 👉 Escuchar cambios en inputs
+        contenedor.addEventListener("input", function (e) {
+            if (e.target.classList.contains("monto")) {
+                calcularTotal();
+            }
+        });
+
+        // 👉 Función para calcular total
+        function calcularTotal() {
+            let total = 0;
+
+            document.querySelectorAll(".monto").forEach(input => {
+                total += parseFloat(input.value) || 0;
+            });
+
+            totalSpan.textContent = total.toFixed(2);
+        }
+
+    });
+
+    $(document).on("click", ".btnAdelanto", function () {
+        let tratamientoId = $(this).data("tratamiento-id");
+        $("#btnGuardarPagos").data("id", tratamientoId);
+        console.log("Tratamiento ID:", tratamientoId);
+    });
+
+    $("#btnGuardarPagos").on("click", function (e) {
+        e.preventDefault();
+
+        let btn = $(this);
+        btn.prop("disabled", true);
+
+        let pagos = [];
+
+        $(".pago-item").each(function () {
+
+            let metodo = $(this).find(".metodo").val();
+            let monto = parseFloat($(this).find(".monto").val()) || 0;
+
+            if (monto > 0) {
+                pagos.push({
+                    metodo: metodo,
+                    monto: monto
+                });
+            }
+        });
+
+        if (pagos.length === 0) {
+            alert("Debe ingresar al menos un pago válido");
+            btn.prop("disabled", false);
+            return;
+        }
+
+        $.ajax({
+            url: "/pagos/adelanto",
+            type: "POST",
+            data: {
+                _token: $('meta[name="csrf-token"]').attr('content'),
+                tratamiento_id: $("#btnGuardarPagos").data("id"), // 🔥 CORRECTO
+                pagos: pagos
+            },
+            success: function (response) {
+
+                alert("✅ Pagos registrados correctamente");
+
+                $("#ModalAdelantoTratamiento").modal("hide");
+
+                // 🔥 limpiar formulario
+                $(".monto").val(0);
+                $("#totalPagos").text("0");
+
+            },
+            error: function (xhr) {
+                console.error(xhr);
+                alert("❌ Error al guardar");
+            },
+            complete: function () {
+                btn.prop("disabled", false);
+            }
+        });
+
+    });
+</script>
+
 <script>
     $(document).ready(function () {
         $(document).on("submit", ".searchform", function(e) {
@@ -302,7 +438,7 @@
 
                     <div class="card-body" id="DivTratamiento">
                         <p>Cargando tratamientos...</p>
-                    </div>
+                    </div>                    
                 </div>
             `);
 
@@ -314,11 +450,12 @@
 
                     if (data.length > 0) {
                         let html = ``;
+
                         data.forEach((t, index) => {
+
                             let estadoHTML = '';
                             let duracion = calcularDuracion(t.fecha_inicio, t.fecha_fin_estimada);
 
-                            // 🔥 estado
                             if (t.estado === 'activo') {
                                 estadoHTML = `<span class="text-success">
                                     <i class="fas fa-circle mr-1" style="font-size:10px;"></i> En proceso
@@ -333,7 +470,47 @@
                                 </span>`;
                             }
 
-                            // 🔥 render final
+                            // 🔥 PAGOS
+                            let pagosHTML = '';
+                            let totalPagos = 0;
+
+                            if (t.pagos && t.pagos.length > 0) {
+
+                                t.pagos.forEach(p => {
+
+                                    let nombre = '';
+
+                                    if (p.sesion_id === null) {
+                                        nombre = 'Adelanto de tratamiento';
+                                    } else {
+                                        let sesion = t.sesiones.find(s => s.id === p.sesion_id);
+                                        nombre = sesion 
+                                            ? `Sesión (${sesion.fecha_atencion})`
+                                            : `Sesión #${p.sesion_id}`;
+                                    }
+
+                                    let monto = parseFloat(p.monto);
+                                    totalPagos += monto;
+
+                                    pagosHTML += `
+                                        <div class="row pago-item" style="padding: 10px">
+                                            <div class="col-md-7">
+                                                ${nombre} <br>
+                                                <small>${p.metodo_pago}</small>
+                                            </div>
+
+                                            <div class="col-md-5 text-right">
+                                                ${monto.toFixed(2)} Bs.
+                                            </div>
+                                        </div>
+                                    `;
+                                });
+
+                            } else {
+                                pagosHTML = `<p class="text-muted p-2">No hay pagos registrados</p>`;
+                            }
+
+                            // 🔥 HTML FINAL
                             html += `
                             <div class="row mb-2">
                                 <div class="col-md-12">
@@ -368,9 +545,32 @@
                                                             Ver Tratamiento
                                                         </a>
 
-                                                        <a href="#" class="btn btn-sm btn-link" id="btnAdelanto" data-paciente-id="${t.id}" data-toggle="modal" data-target="#ModalAdelantoTratamiento">
+                                                        <a href="#" class="btn btn-sm btn-link btnAdelanto" data-tratamiento-id="${t.id}" data-toggle="modal" data-target="#ModalAdelantoTratamiento">
                                                             Adelanto
                                                         </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- 🔥 PAGOS -->
+                                            <div class="card-body">
+                                                <div class="card shadow">
+
+                                                    <div class="card-header d-flex justify-content-between align-items-center" style="background: #2E383F">
+                                                        <h5 class="mb-0" style="color: white">Pagos</h5>
+                                                    </div>
+
+                                                    <div id="contenedorPagos">
+                                                        ${pagosHTML}
+                                                    </div>
+
+                                                    <div class="card-header d-flex justify-content-between align-items-center" style="background: #2E383F">
+                                                        <h5 class="mb-0" style="color: white">
+                                                            Total
+                                                        </h5>
+                                                        <h5 class="mb-0" style="color: white">
+                                                            ${totalPagos.toFixed(2)} Bs.
+                                                        </h5>
                                                     </div>
                                                 </div>
                                             </div>
@@ -381,7 +581,9 @@
                             </div>
                             `;
                         });
+
                         div.innerHTML = html;
+
                     } else {
                         div.innerHTML = `<div class="alert alert-warning">Este paciente no tiene tratamientos en proceso.</div>`;
                     }
@@ -390,7 +592,7 @@
                     console.error(err);
                     document.getElementById("DivTratamiento").innerHTML = `<div class="alert alert-danger">Error al cargar tratamientos.</div>`;
                 });
-            });
+                });
 
             // Escuchar el click en el botón
             $(document).on("click", "#btnVerTratamiento", function(e) {
@@ -421,25 +623,44 @@
                         if (sesiones && sesiones.length > 0) {                         
 
                             html += `<ul class="list-group">`;
-                            sesiones.forEach(function(s) {
-                                let botonFirma = s.firma 
-                                ? `<img src="/storage/${s.firma}" width="120"/>`
-                                : `<a href="#" class="btn mb-2 btn-link btnFirmar" data-id="${s.id}">¿Quieres Firmar?</a>`
+                            sesiones.forEach(function (s) {
+                                let pagosSesion = data.pagos.filter(p => p.sesion_id === s.id);
+                                let pagadoSesion = pagosSesion.reduce(
+                                    (sum, p) => sum + parseFloat(p.monto),
+                                    0
+                                );
+                                let desglose = {};
+
+                                pagosSesion.forEach(p => {
+                                    let metodo = p.metodo_pago || 'sin metodo';
+                                    desglose[metodo] = (desglose[metodo] || 0) + parseFloat(p.monto);
+                                });
+
+                                let detallePagoHtml = Object.keys(desglose)
+                                    .map(m => `- ${m.toUpperCase()}: ${desglose[m].toFixed(2)} Bs`)
+                                    .join("<br>");
+
+                                let botonFirma = s.firma
+                                    ? `<img src="/storage/${s.firma}" width="120"/>`
+                                    : `<a href="#" class="btn mb-2 btn-link btnFirmar" data-id="${s.id}">¿Quieres Firmar?</a>`;
 
                                 html += `
                                     <table class="table table-bordered" style="width:100%;">
                                         <tr>
-                                            <th style="width:60%;">
+                                            <th style="width:55%;">
                                                 <strong>FECHA DE ATENCION:</strong> ${s.fecha_atencion} <br><br>
                                                 <strong>ANALISIS:</strong> ${s.analisis} <br><br>
                                                 <strong>PLAN DE ACCION:</strong> ${s.plan_accion} <br><br>
                                             </th>
 
-                                            <th style="width:10%;">${s.saldo} Bs.</th>
+                                            <th style="width:15%;">
+                                                <strong>${pagadoSesion.toFixed(2)} Bs</strong><br>
+                                                <small>${detallePagoHtml}</small>
+                                            </th>
 
-                                            <th style="width:10%;">${s.saldo} Bs.</th>
-
-                                            <td style="width:20%;">${botonFirma}</td>
+                                            <td style="width:20%;">
+                                                ${botonFirma}
+                                            </td>
                                         </tr>
                                     </table>
                                 `;
@@ -493,64 +714,169 @@
 
             });
 
+/** inisio de session */
             // Delegar el evento porque el botón se genera dinámicamente
-            $(document).on("click", "#btnAgregarSesionTratamiento", function(e) {
+            $(document).on("click", "#btnAgregarSesionTratamiento", function (e) {
                 e.preventDefault();
 
                 let tratamientoId = $(this).data("tratamiento-id");
 
-                // Construir el formulario
                 let formHtml = `
                     <form id="formNuevaSesion" data-tratamiento-id="${tratamientoId}">
+
                         <div class="mb-3">
-                            <label for="fechaAtencion" class="form-label">Fecha de atención</label>
-                            <input type="date" class="form-control" id="fechaAtencion" name="fechaAtencion" required>
+                            <label class="form-label">Fecha de atención</label>
+                            <input type="date" class="form-control" name="fechaAtencion" required>
                         </div>
+
                         <div class="mb-3">
-                            <label for="analisis" class="form-label">Análisis</label>
-                            <input type="text" class="form-control" id="analisis" name="analisis" required>
+                            <label class="form-label">Análisis</label>
+                            <input type="text" class="form-control" name="analisis" required>
                         </div>
+
                         <div class="mb-3">
-                            <label for="planAccion" class="form-label">Plan de acción</label>
-                            <textarea class="form-control" id="planAccion" name="planAccion" required></textarea>
+                            <label class="form-label">Plan de acción</label>
+                            <textarea class="form-control" name="planAccion" required></textarea>
                         </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="costo" class="form-label">Costo</label>
-                                <input type="number" step="0.01" class="form-control" id="costo" name="costo" required>
+
+                        <div class="card shadow">
+
+                            <div class="card-header d-flex justify-content-between align-items-center" style="background: #2E383F">
+                                <h5 class="mb-0 text-white">Pago o Adelanto</h5>
+                                <a href="#" class="btn btn-sm btn-outline-primary" id="btnAgregarPagosSesion">+</a>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="saldo" class="form-label">Saldo</label>
-                                <input type="number" step="0.01" class="form-control" id="saldo" name="saldo" required>
+
+                            <div id="contenedorPagosSesion">
+                                <div class="row pago-item-sesion" style="padding: 15px">
+
+                                    <div class="col-md-7">
+                                        <select class="form-control metodo">
+                                            <option value="efectivo">Efectivo</option>
+                                            <option value="qr">QR/Deposito</option>
+                                            <option value="tarjeta">Tarjeta</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <input class="form-control monto" type="number" value="0">
+                                    </div>
+
+                                    <div class="col-md-2">
+                                        <a href="#" class="btn btn-sm btn-outline-danger btnEliminarPagoSesion">X</a>
+                                    </div>
+
+                                </div>
                             </div>
+
+                            <div class="card-header d-flex justify-content-between align-items-center" style="background: #2E383F">
+                                <h5 class="mb-0 text-white">
+                                    Total: <span id="totalPagosSesion">0</span>
+                                </h5>
+                            </div>
+
                         </div>
-                        <button type="submit" class="btn btn-success">Guardar Sesión</button>
+
+                        <br>
+
+                        <button type="submit" class="btn btn-success">
+                            Guardar Sesión
+                        </button>
+
                     </form>
                 `;
 
-                // Insertar en el div
                 $("#CrearDivSesion").html(formHtml);
+            });
 
-                $(document).on("submit", "#formNuevaSesion", function(e) {
-                    e.preventDefault();
+            $(document).on("submit", "#formNuevaSesion", function (e) {
+                e.preventDefault();
 
-                    let tratamientoId = $(this).data("tratamiento-id");
-                    let formData = $(this).serialize();
+                let form = $(this);
+                let tratamientoId = form.data("tratamiento-id");
 
-                    $.ajax({
-                        url: `/tratamiento/${tratamientoId}/sesiones`,
-                        type: "POST",
-                        data: formData,
-                        success: function(response) {
-                            alert(response.message);
-                        },
-                        error: function(xhr) {
-                            alert("Error al guardar la sesión: " + xhr.responseText);
-                        }
-                    });
+                let pagos = [];
+
+                $("#contenedorPagosSesion .pago-item-sesion").each(function () {
+
+                    let metodo = $(this).find(".metodo").val();
+                    let monto = parseFloat($(this).find(".monto").val()) || 0;
+
+                    if (monto > 0) {
+                        pagos.push({
+                            metodo: metodo,
+                            monto: monto
+                        });
+                    }
                 });
 
+                let data = form.serializeArray();
+                data.push({ name: "pagos", value: JSON.stringify(pagos) });
+
+                $.ajax({
+                    url: `/tratamiento/${tratamientoId}/sesiones`,
+                    type: "POST",
+                    data: data,
+                    success: function (response) {
+                        alert("Sesión guardada correctamente");
+
+                        $("#CrearDivSesion").html("");
+                    },
+                    error: function (xhr) {
+                        console.error(xhr);
+                        alert("Error al guardar la sesión");
+                    }
+                });
             });
+
+            $(document).on("click", "#btnAgregarPagosSesion", function (e) {
+                e.preventDefault();
+
+                let fila = `
+                    <div class="row pago-item-sesion" style="padding: 15px">
+
+                        <div class="col-md-7">
+                            <select class="form-control metodo">
+                                <option value="efectivo">Efectivo</option>
+                                <option value="qr">QR/Deposito</option>
+                                <option value="tarjeta">Tarjeta</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <input class="form-control monto" type="number" value="0">
+                        </div>
+
+                        <div class="col-md-2">
+                            <a href="#" class="btn btn-sm btn-outline-danger btnEliminarPagoSesion">X</a>
+                        </div>
+
+                    </div>
+                `;
+
+                $("#contenedorPagosSesion").append(fila);
+            });
+
+            $(document).on("click", ".btnEliminarPagoSesion", function (e) {
+                e.preventDefault();
+
+                if ($(".pago-item-sesion").length > 1) {
+                    $(this).closest(".pago-item-sesion").remove();
+                } else {
+                    alert("Debe existir al menos un pago");
+                }
+            });
+
+            $(document).on("input", "#contenedorPagosSesion .monto", function () {
+
+                let total = 0;
+
+                $("#contenedorPagosSesion .monto").each(function () {
+                    total += parseFloat($(this).val()) || 0;
+                });
+
+                $("#totalPagosSesion").text(total.toFixed(2));
+            });
+/** final de session */
 
             // Función para volver al buscador
             function volverBuscador() {
