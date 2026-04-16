@@ -32,9 +32,14 @@ class SesionTratamiento extends Model
 
     public function productos()
     {
-        return $this->belongsToMany(Producto::class, 'sesion_producto')
-            ->withPivot('cantidad', 'precio')
-            ->withTimestamps();
+        return $this->belongsToMany(
+            Producto::class,
+            'sesion_producto',
+            'sesion_id',
+            'producto_id'
+        )->withPivot([
+            'detalle'
+        ])->withTimestamps();
     }
 
 }

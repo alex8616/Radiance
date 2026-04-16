@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Models\Producto;
 use App\Models\Paciente;
 use App\Models\Doctor;
 use App\Models\CategoriaTratamiento;
@@ -105,5 +106,13 @@ class DatabaseSeeder extends Seeder
             'sexo' => 'Masculino',
             'imagen' => 'paciente3.jpg'
         ]);
+
+        for ($i = 1; $i <= 50; $i++) {
+            Producto::create([
+                'nombre' => "Producto $i",
+                'descripcion' => "Descripción del producto $i",
+                'precio' => rand(10, 100),
+            ]);
+        }
     }
 }

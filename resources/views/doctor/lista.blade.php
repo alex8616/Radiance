@@ -157,6 +157,70 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade bd-example-modal-xl" id="ModalProductos" tabindex="-1" role="dialog" aria-labelledby="ModalProductosTitle" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Agregar productos usados en la sesion.</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="mb-3">
+                        <input type="text" id="buscarProducto" class="form-control" placeholder="Buscar producto...">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div id="gridProductos" class="row" style="max-height: 400px; overflow-y: auto;"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <table class="table table-sm" id="tablaSeleccionados">
+                                <thead>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th>Detalle</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn mb-2 btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" id="btnGuardarProductos" class="btn btn-primary">
+                Guardar Productos
+            </button>
+        </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .producto-card {
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+        background: #ffffff;
+    }
+
+    .producto-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        background: #f8f9fa;
+    }
+
+    .producto-card:active {
+        transform: scale(0.98);
+    }
+</style>
 <script src="{{ asset('js/utilidades.js') }}"></script>
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -235,7 +299,6 @@
     $(document).on("click", ".btnAdelanto", function () {
         let tratamientoId = $(this).data("tratamiento-id");
         $("#btnGuardarPagos").data("id", tratamientoId);
-        console.log("Tratamiento ID:", tratamientoId);
     });
 
     $("#btnGuardarPagos").on("click", function (e) {
@@ -625,10 +688,12 @@
                             html += `<ul class="list-group">`;
                             sesiones.forEach(function (s) {
                                 let pagosSesion = data.pagos.filter(p => p.sesion_id === s.id);
+
                                 let pagadoSesion = pagosSesion.reduce(
                                     (sum, p) => sum + parseFloat(p.monto),
                                     0
                                 );
+
                                 let desglose = {};
 
                                 pagosSesion.forEach(p => {
@@ -644,6 +709,38 @@
                                     ? `<img src="/storage/${s.firma}" width="120"/>`
                                     : `<a href="#" class="btn mb-2 btn-link btnFirmar" data-id="${s.id}">¿Quieres Firmar?</a>`;
 
+                                // 🔥 PRODUCTOS HTML
+                                let productosHtml = '';
+
+                                if (s.productos && s.productos.length > 0) {
+                                    productosHtml = `
+                                        <div style="margin-top:10px;">
+                                            <table class="table table-sm table-hover table-borderless">
+                                                <thead style="background: #f1f1f1;">
+                                                    <tr>
+                                                        <th>Producto</th>
+                                                        <th>Detalle</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                    `;
+
+                                    s.productos.forEach(p => {
+                                        productosHtml += `
+                                            <tr>
+                                                <td>${p.nombre}</td>
+                                                <td>${p.pivot?.detalle || '-'}</td>
+                                            </tr>
+                                        `;
+                                    });
+
+                                    productosHtml += `
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    `;
+                                }
+
                                 html += `
                                     <table class="table table-bordered" style="width:100%;">
                                         <tr>
@@ -651,6 +748,12 @@
                                                 <strong>FECHA DE ATENCION:</strong> ${s.fecha_atencion} <br><br>
                                                 <strong>ANALISIS:</strong> ${s.analisis} <br><br>
                                                 <strong>PLAN DE ACCION:</strong> ${s.plan_accion} <br><br>
+
+                                                <a href="#" class="btn btn-link btnProductos" data-id="${s.id}">
+                                                    Agregar productos usados
+                                                </a>
+
+                                                ${productosHtml}
                                             </th>
 
                                             <th style="width:15%;">
@@ -705,7 +808,8 @@
                                 });
 
                             });
-                        });
+                        });                       
+
                     },
                     error: function(xhr, status, error) {
                         alert("Error al obtener las sesiones: " + error);
@@ -714,6 +818,172 @@
 
             });
 
+            /**INICIO PRODUCTOS */
+            let productosGlobal = [];
+            let seleccionados = [];
+
+            // 🔹 ABRIR MODAL Y CARGAR PRODUCTOS
+            $(document).on('click', '.btnProductos', function (e) {
+                e.preventDefault();
+
+                let sesionId = $(this).data('id');
+
+                $('#ModalProductos').data('sesion-id', sesionId);
+                $('#sesion_id').val(sesionId);
+
+                // limpiar
+                seleccionados = [];
+                $('#tablaSeleccionados tbody').html('');
+                $('#gridProductos').html('Cargando productos...');
+
+                $.ajax({
+                    url: '/productos-get',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(productos) {
+                        productosGlobal = productos;
+                        renderProductos(productosGlobal);
+                    },
+                    error: function() {
+                        $('#gridProductos').html('Error al cargar productos');
+                    }
+                });
+
+                $('#ModalProductos').modal('show');
+            });
+
+
+            // 🔹 RENDER GRID PRODUCTOS
+            function renderProductos(lista) {
+                let html = '';
+
+                lista.forEach(p => {
+                    html += `
+                        <div class="col-6 col-md-4 col-lg-3 mb-3">
+                            <div class="card producto-card shadow-sm border-0 h-100"
+                                data-id="${p.id}" 
+                                data-nombre="${p.nombre}">
+
+                                <div class="card-body d-flex align-items-center justify-content-center text-center">
+                                    <span class="fw-semibold text-dark">
+                                        ${p.nombre}
+                                    </span>
+                                </div>
+
+                            </div>
+                        </div>
+                    `;
+                });
+
+                $('#gridProductos').html(html);
+            }
+
+
+            // 🔹 CLICK EN PRODUCTO (AGREGAR)
+            $(document).on('click', '.producto-card', function () {
+
+                let id = $(this).data('id');
+                let nombre = $(this).data('nombre');
+
+                // evitar duplicados
+                let existe = seleccionados.find(p => p.id == id);
+                if (existe) return;
+
+                seleccionados.push({
+                    id: id,
+                    nombre: nombre,
+                    cantidad: 1
+                });
+
+                $(this).addClass('active');
+
+                renderSeleccionados();
+            });
+
+
+            // 🔹 RENDER TABLA DERECHA
+            function renderSeleccionados() {
+
+                let html = '';
+
+                seleccionados.forEach((p, index) => {
+                    html += `
+                        <tr>
+                            <td>${p.nombre}</td>
+                            <td>
+                                <input type="text" 
+                                    value="${p.detalle || ''}" 
+                                    placeholder="Ej: 1 litro, 2 unidades..."
+                                    class="form-control detalleSel" 
+                                    data-index="${index}">
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-danger eliminarSel" data-index="${index}">X</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                $('#tablaSeleccionados tbody').html(html);
+            }
+
+            // 🔹 ELIMINAR PRODUCTO
+            $(document).on('click', '.eliminarSel', function () {
+                let index = $(this).data('index');
+                let producto = seleccionados[index];
+
+                // quitar clase active del grid
+                $(`.producto-card[data-id="${producto.id}"]`).removeClass('active');
+
+                seleccionados.splice(index, 1);
+                renderSeleccionados();
+            });
+
+
+            // 🔹 BUSCADOR
+            $(document).on('keyup', '#buscarProducto', function () {
+                let texto = $(this).val().toLowerCase();
+
+                let filtrados = productosGlobal.filter(p =>
+                    p.nombre.toLowerCase().includes(texto)
+                );
+
+                renderProductos(filtrados);
+            });           
+
+            // 🔹 GUARDAR
+            $(document).on('input', '.detalleSel', function () {
+                let index = $(this).data('index');
+                seleccionados[index].detalle = $(this).val();
+            });
+
+           $('#btnGuardarProductos').click(function () {
+                let sesionId = $('#ModalProductos').data('sesion-id');
+
+                let productos = seleccionados.map(p => ({
+                    producto_id: p.id,
+                    detalle: p.detalle 
+                }));
+
+                $.ajax({
+                    url: `/sesiones/${sesionId}/productos`,
+                    type: 'POST',
+                    data: {
+                        _token: $('meta[name="csrf-token"]').attr('content'),
+                        productos: productos
+                    },
+                    success: function(resp) {
+                        alert(resp.message);
+                        $('#ModalProductos').modal('hide');
+                    },
+                    error: function(err) {
+                        console.error(err);
+                        alert('Error al guardar productos');
+                    }
+                });
+
+            });
+            /**FIN PRODUCTOS */
 /** inisio de session */
             // Delegar el evento porque el botón se genera dinámicamente
             $(document).on("click", "#btnAgregarSesionTratamiento", function (e) {

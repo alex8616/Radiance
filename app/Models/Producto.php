@@ -15,7 +15,7 @@ class Producto extends Model
     public function sesiones()
     {
         return $this->belongsToMany(SesionTratamiento::class, 'sesion_producto')
-            ->withPivot('cantidad', 'precio')
+            ->withPivot('detalle', 'precio')
             ->withTimestamps();
     }
 }

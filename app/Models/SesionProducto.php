@@ -11,7 +11,7 @@ class SesionProducto extends Model
     protected $fillable = [
         'sesion_id',
         'producto_id',
-        'cantidad',
+        'detalle',
         'precio'
     ];
 
