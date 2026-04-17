@@ -10,7 +10,7 @@ class SesionProducto extends Model
 
     protected $fillable = [
         'sesion_id',
-        'producto_id',
+        'producto_sucursal_id',
         'detalle',
         'precio'
     ];
@@ -20,8 +20,8 @@ class SesionProducto extends Model
         return $this->belongsTo(SesionTratamiento::class, 'sesion_id');
     }
 
-    public function producto()
+    public function productoSucursal()
     {
-        return $this->belongsTo(Producto::class, 'producto_id');
+        return $this->belongsTo(ProductoSucursal::class);
     }
 }

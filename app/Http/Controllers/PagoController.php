@@ -33,8 +33,8 @@ class PagoController extends Controller
             ]);
         }
 
-        return response()->json([
-            'success' => true
-        ]);
+        $pacienteId = $tratamiento->paciente_id;
+
+        return response()->json($pacienteId);
     }
 }

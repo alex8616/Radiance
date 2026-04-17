@@ -11,16 +11,18 @@ return new class extends Migration {
             $table->id();
 
             $table->foreignId('sesion_id')
-                ->constrained('sesiones_tratamiento')
-                ->onDelete('cascade');
+                  ->constrained('sesiones_tratamiento')
+                  ->cascadeOnDelete();
 
-            $table->foreignId('producto_id')
-                ->constrained('productos')
-                ->onDelete('cascade');
+            // 🔥 CAMBIO CLAVE
+            $table->foreignId('producto_sucursal_id')
+                  ->constrained('producto_sucursal')
+                  ->cascadeOnDelete();
 
-                
             $table->text('detalle')->nullable();
-            $table->decimal('precio', 10, 2)->default(0);
+
+            // 🔥 guardar precio histórico
+            $table->decimal('precio', 10, 2);
 
             $table->timestamps();
         });

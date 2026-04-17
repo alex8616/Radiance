@@ -119,3 +119,4 @@ Route::post('/guardar-firma', [FirmaController::class, 'guardarFirma']);
 Route::post('/pagos/adelanto', [PagoController::class, 'guardarAdelanto']);
 Route::get('/productos-get', [ProductoController::class, 'GetProductos']);
 Route::post('/sesiones/{sesion}/productos', [ProductoController::class, 'CrearProductoSesion']);
+Route::get('/sesion/{id}/firma-status', [FirmaController::class, 'firmaStatus']);

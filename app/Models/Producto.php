@@ -18,4 +18,10 @@ class Producto extends Model
             ->withPivot('detalle', 'precio')
             ->withTimestamps();
     }
+
+    // 🔥 relación con inventario
+    public function inventarios()
+    {
+        return $this->hasMany(ProductoSucursal::class);
+    }
 }

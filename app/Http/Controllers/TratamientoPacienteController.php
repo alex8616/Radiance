@@ -54,13 +54,16 @@ class TratamientoPacienteController extends Controller
     }
 
     public function GetTratamientoSesion($tratamientoId){
-        $tratamiento = TratamientoPaciente::with('sesiones')
-                                        ->with('pagos')
-                                        ->with('sesiones.productos')
-                                        ->find($tratamientoId);
+        $tratamiento = TratamientoPaciente::with([
+            'sesiones',
+            'pagos',
+            'sesiones.productos.producto' // 🔥 CLAVE
+        ])->find($tratamientoId);
+
         if (!$tratamiento) {
             return response()->json(['error' => 'Tratamiento no encontrado'], 404);
         }
+
         return response()->json($tratamiento);
     }
 }

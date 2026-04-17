@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
+use App\Models\SesionTratamiento;
 
 class FirmaController extends Controller
 {
@@ -79,5 +80,14 @@ class FirmaController extends Controller
             ->delete();
 
         return response()->json(['ok' => true]);
+    }
+
+    public function firmaStatus($id){
+        $sesion = SesionTratamiento::find($id);
+
+        return response()->json([
+            'firmado' => !is_null($sesion->firma),
+            'firma' => $sesion->firma
+        ]);
     }
 }

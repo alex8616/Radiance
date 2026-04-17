@@ -26,4 +26,14 @@ class Sucursal extends Model
     {
         return $this->hasMany(Cita::class);
     }
+
+    public function inventarios()
+    {
+        return $this->hasMany(ProductoSucursal::class);
+    }
+
+    public function sesiones()
+    {
+        return $this->hasMany(SesionTratamiento::class);
+    }
 }

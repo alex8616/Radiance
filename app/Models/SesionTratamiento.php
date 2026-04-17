@@ -10,6 +10,7 @@ class SesionTratamiento extends Model
 
     protected $fillable = [
         'tratamiento_id',
+        'sucursal_id', // 🔥 NUEVO
         'fecha',
         'fecha_atencion',
         'observaciones',
@@ -25,21 +26,27 @@ class SesionTratamiento extends Model
         return $this->belongsTo(TratamientoPaciente::class, 'tratamiento_id');
     }
 
+    public function sucursal()
+    {
+        return $this->belongsTo(Sucursal::class);
+    }
+
     public function pagos()
     {
         return $this->hasMany(Pago::class, 'sesion_id');
     }
 
+    // 🔥 CAMBIO CLAVE
     public function productos()
     {
         return $this->belongsToMany(
-            Producto::class,
+            ProductoSucursal::class,
             'sesion_producto',
             'sesion_id',
-            'producto_id'
+            'producto_sucursal_id'
         )->withPivot([
-            'detalle'
+            'detalle',
+            'precio'
         ])->withTimestamps();
     }
-
 }

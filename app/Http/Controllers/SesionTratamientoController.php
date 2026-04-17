@@ -23,6 +23,7 @@ class SesionTratamientoController extends Controller
         ]);
 
         $sesion = SesionTratamiento::create([
+            'sucursal_id' => $tratamiento->sucursal_id,
             'tratamiento_id' => $tratamientoId,
             'fecha_atencion' => $validated['fechaAtencion'],
             'analisis' => $validated['analisis'],
@@ -51,9 +52,8 @@ class SesionTratamientoController extends Controller
             }
         }
 
-        return response()->json([
-            'message' => 'Sesión y pagos registrados correctamente',
-            'sesion'  => $sesion
-        ], 201);
+        $pacienteId = $tratamiento->paciente_id;
+
+        return response()->json($pacienteId);
     }
 }
