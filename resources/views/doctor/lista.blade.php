@@ -162,7 +162,7 @@
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
         <div class="modal-header">
-            <h5 class="modal-title">Agregar productos usados en la sesion.</h5>
+            <h5 class="modal-title">Agregar Materiales usados en la sesion.</h5>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
             </button>
@@ -2020,7 +2020,7 @@ $('#btnGuardarProductos').click(function () {
                                         class="btn btn-link btnProductos" 
                                         data-id="${s.id}" 
                                         data-sucursal="${s.sucursal_id}">
-                                            Agregar productos usados
+                                            Agregar Materiales  usados
                                         </a>
 
                                         ${productosHtml}
@@ -2091,19 +2091,21 @@ $('#btnGuardarProductos').click(function () {
         });
     }
 
+    let pollingFirmas = {};
+
     function iniciarPollingFirma(sesionId, $td) {
-        if (pollingFirmas[sesionId]) return; // 🔥 evita duplicados
+        if (pollingFirmas[sesionId]) return;
+
         pollingFirmas[sesionId] = setInterval(function () {
             $.get(`/sesion/${sesionId}/firma-status`, function (resp) {
                 if (resp.firmado) {
                     clearInterval(pollingFirmas[sesionId]);
                     delete pollingFirmas[sesionId];
+
                     $td.html(`<img src="/storage/${resp.firma}" width="120"/>`);
                     toastSuccess("Firma registrada correctamente");
                 }
-
             });
-
         }, 3000);
     }
 </script>

@@ -66,6 +66,10 @@ Route::get('/usuarios', [DoctorController::class, 'index'])
     ->name('usuarios.index')
     ->middleware(['auth', 'role:admin']);
 
+Route::get('/materiales', [ProductoController::class, 'index'])
+    ->name('admin.materiales')
+    ->middleware(['auth', 'role:admin']);
+
 Route::get('/usuarios-get', [DoctorController::class, 'GetUsuarios']);
 Route::post('/usuarios-create', [DoctorController::class, 'create']);
 
@@ -120,3 +124,7 @@ Route::post('/pagos/adelanto', [PagoController::class, 'guardarAdelanto']);
 Route::get('/productos-get', [ProductoController::class, 'GetProductos']);
 Route::post('/sesiones/{sesion}/productos', [ProductoController::class, 'CrearProductoSesion']);
 Route::get('/sesion/{id}/firma-status', [FirmaController::class, 'firmaStatus']);
+
+
+Route::get('/materiales-get', [ProductoController::class, 'GetMateriales']);
+Route::put('/materiales/{id}', [ProductoController::class, 'update']);

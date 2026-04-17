@@ -131,6 +131,11 @@
                       Usuarios
                   </a>
               </li>
+              <li class="nav-item dropdown">
+                  <a class="dropdown-toggle nav-link pl-lg-3" href="{{ route('admin.materiales') }}">
+                      Materiales
+                  </a>
+              </li>
               @endif
               <li class="nav-item dropdown">
                 <a href="#" id="ui-elementsDropdown" class="dropdown-toggle nav-link" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

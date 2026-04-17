@@ -10,6 +10,10 @@ use App\Models\SesionTratamiento;
 
 class ProductoController extends Controller
 {
+    public function index(){
+        return view('admin.materiales');
+    }
+
     public function GetProductos(){
 
         $sucursalId = session('sucursal_id');
@@ -77,5 +81,31 @@ class ProductoController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function GetMateriales(){
+        $productos = Producto::get();
+        return response()->json($productos);
+    }
+
+    public function update(Request $request, $id){
+        // 🔥 Validación básica
+        $request->validate([
+            'nombre' => 'required|string|max:255',
+            'descripcion' => 'nullable|string'
+        ]);
+
+        // 🔥 Buscar material
+        $material = Producto::findOrFail($id);
+
+        // 🔥 Actualizar
+        $material->nombre = $request->nombre;
+        $material->descripcion = $request->descripcion;
+        $material->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Material actualizado correctamente'
+        ]);
     }
 }
