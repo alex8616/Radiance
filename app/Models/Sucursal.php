@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Producto;
 
 class Sucursal extends Model
 {
@@ -35,5 +36,15 @@ class Sucursal extends Model
     public function sesiones()
     {
         return $this->hasMany(SesionTratamiento::class);
+    }
+
+    public function productos()
+    {
+        return $this->belongsToMany(
+            Producto::class,
+            'producto_sucursal',
+            'sucursal_id',
+            'producto_id'
+        )->withPivot('precio', 'stock')->withTimestamps();
     }
 }

@@ -18,8 +18,8 @@ return new class extends Migration {
                     ->constrained('sucursales')
                     ->cascadeOnDelete();
 
-            $table->decimal('precio', 10, 2);
-            $table->integer('stock')->default(0);
+            $table->decimal('precio', 10, 2)->NULLABLE()->default(0);   
+            $table->integer('stock')->nullable()->default(0);
 
             $table->timestamps();
         });

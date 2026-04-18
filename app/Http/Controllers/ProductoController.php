@@ -84,7 +84,7 @@ class ProductoController extends Controller
     }
 
     public function GetMateriales(){
-        $productos = Producto::get();
+        $productos = Producto::with('sucursales')->get();
         return response()->json($productos);
     }
 
@@ -107,5 +107,94 @@ class ProductoController extends Controller
             'success' => true,
             'message' => 'Material actualizado correctamente'
         ]);
+    }
+
+    public function CrearMaterial(Request $request){
+        ///return response()->json($request);
+        try {
+            // 🔥 Validación
+            $validated = $request->validate([
+                'nombre' => 'required|string|max:255',
+                'descripcion' => 'nullable|string',
+                'sucursales' => 'required|array|min:1',
+                'sucursales.*' => 'integer|exists:sucursales,id',
+            ]);
+
+            DB::beginTransaction();
+
+            // 🔥 Crear producto
+            $material = Producto::create([
+                'nombre' => $validated['nombre'],
+                'descripcion' => $validated['descripcion'] ?? null,
+            ]);
+
+            // 🔥 Preparar datos para pivote (OBLIGATORIO por precio/stock)
+            $syncData = [];
+
+            foreach ($validated['sucursales'] as $sucursalId) {
+                $syncData[$sucursalId] = [
+                    'precio' => 0, // valor por defecto
+                    'stock'  => 0  // valor por defecto
+                ];
+            }
+
+            // 🔥 Relacionar sucursales
+            $material->sucursales()->sync($syncData);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Material guardado correctamente',
+                'material' => $material->load('sucursales')
+            ]);
+
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al guardar el material',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function asignarSucursales(Request $request){
+        try {
+
+            // 🔥 Validación
+            $validated = $request->validate([
+                'producto_id' => 'required|exists:productos,id',
+                'sucursales' => 'required|array|min:1',
+                'sucursales.*' => 'integer|exists:sucursales,id',
+            ]);
+
+            DB::beginTransaction();
+
+            $producto = Producto::findOrFail($validated['producto_id']);
+
+            // 🔥 SINCRONIZA (reemplaza las anteriores)
+            $producto->sucursales()->sync($validated['sucursales']);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Sucursales asignadas correctamente',
+                'producto' => $producto->load('sucursales')
+            ]);
+
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al asignar sucursales',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

@@ -128,3 +128,5 @@ Route::get('/sesion/{id}/firma-status', [FirmaController::class, 'firmaStatus'])
 
 Route::get('/materiales-get', [ProductoController::class, 'GetMateriales']);
 Route::put('/materiales/{id}', [ProductoController::class, 'update']);
+Route::post('/materiales-store', [ProductoController::class, 'CrearMaterial']);
+Route::post('/materiales/asignar-sucursales', [ProductoController::class, 'asignarSucursales']);
