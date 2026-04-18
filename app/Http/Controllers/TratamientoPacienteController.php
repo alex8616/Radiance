@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use App\Models\CategoriaTratamiento;
 use App\Models\TratamientoPaciente;
 use App\Models\Doctor;
+use App\Models\SesionTratamiento;
+use Illuminate\Support\Facades\Auth;
+
 
 class TratamientoPacienteController extends Controller
 {
@@ -65,5 +68,49 @@ class TratamientoPacienteController extends Controller
         }
 
         return response()->json($tratamiento);
+    }
+
+    public function TratamientosGet(){
+        $user = auth()->user();
+        $query = TratamientoPaciente::query();
+        if ($user->role === 'doctor') {
+            $doctor = Doctor::where('user_id', $user->id)->first();
+            if (!$doctor) {
+                return response()->json([
+                    'role' => $user->role,
+                    'tratamientos' => []
+                ]);
+            }
+            $query->where('doctor_id', $doctor->id);
+        }
+
+        return response()->json([
+            'role' => $user->role,
+            'tratamientos' => $query->get()
+        ]);
+    }
+
+    public function SesionesGet(){
+        $user = Auth::user();
+
+        if ($user->role === 'admin') {
+            $sesiones = SesionTratamiento::all();
+        } 
+        else if ($user->role === 'doctor') {
+            $doctor = Doctor::where('user_id', $user->id)->first();
+            $tratamiento = TratamientoPaciente::where('doctor_id',$doctor->id)->first();
+            $sesion = SesionTratamiento::where('tratamiento_id', $tratamiento->id)
+                                            ->get();
+            
+            $sucursalId = session('sucursal_id');
+
+            return response()->json($sucursalId);
+
+        } 
+        else {
+            $sesiones = collect();
+        }
+
+        return response()->json($sesiones);
     }
 }

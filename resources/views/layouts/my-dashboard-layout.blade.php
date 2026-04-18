@@ -136,22 +136,12 @@
                       Materiales
                   </a>
               </li>
-              @endif
               <li class="nav-item dropdown">
-                <a href="#" id="ui-elementsDropdown" class="dropdown-toggle nav-link" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  <span class="ml-lg-2">Calendario</span>
-                </a>
-                <div class="dropdown-menu" aria-labelledby="ui-elementsDropdown">
-                  <a class="nav-link pl-lg-2" href="./ui-color.html"><span class="ml-1">Colors</span></a>
-                  <a class="nav-link pl-lg-2" href="./ui-typograpy.html"><span class="ml-1">Typograpy</span></a>
-                  <a class="nav-link pl-lg-2" href="./ui-icons.html"><span class="ml-1">Icons</span></a>
-                  <a class="nav-link pl-lg-2" href="./ui-buttons.html"><span class="ml-1">Buttons</span></a>
-                  <a class="nav-link pl-lg-2" href="./ui-notification.html"><span class="ml-1">Notifications</span></a>
-                  <a class="nav-link pl-lg-2" href="./ui-modals.html"><span class="ml-1">Modals</span></a>
-                  <a class="nav-link pl-lg-2" href="./ui-tabs-accordion.html"><span class="ml-1">Tabs & Accordion</span></a>
-                  <a class="nav-link pl-lg-2" href="./ui-progress.html"><span class="ml-1">Progress</span></a>
-                </div>
+                  <a class="dropdown-toggle nav-link pl-lg-3" href="{{ route('admin.calendar') }}">
+                      Calendario
+                  </a>
               </li>
+              @endif
               <li class="nav-item dropdown">
                 <a href="#" id="formsDropdown" class="dropdown-toggle nav-link" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                   <span class="ml-lg-2">Pacientes</span>
@@ -291,6 +281,8 @@
     <script src="{{ asset('dashboard/js/uppy.min.js') }}"></script>
     <script src="{{ asset('dashboard/js/quill.min.js') }}"></script>
 
+    
+    
     <script>
         $.ajaxSetup({
             headers: {

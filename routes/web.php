@@ -10,6 +10,8 @@ use App\Http\Controllers\SesionTratamientoController;
 use App\Http\Controllers\FirmaController;
 use App\Http\Controllers\PagoController;
 use App\Http\Controllers\ProductoController;
+use App\Http\Controllers\CalendarController;
+use App\Http\Controllers\ReporteController;
 
 /*
 |--------------------------------------------------------------------------
@@ -70,6 +72,10 @@ Route::get('/materiales', [ProductoController::class, 'index'])
     ->name('admin.materiales')
     ->middleware(['auth', 'role:admin']);
 
+Route::get('/calendar', [CalendarController::class, 'index'])
+    ->name('admin.calendar')
+    ->middleware(['auth', 'role:admin']);
+
 Route::get('/usuarios-get', [DoctorController::class, 'GetUsuarios']);
 Route::post('/usuarios-create', [DoctorController::class, 'create']);
 
@@ -111,6 +117,8 @@ Route::get('/categoria-get', [TratamientoPacienteController::class, 'GetCategori
 Route::post('/pacientes/{paciente}/crear-tratamientos', [TratamientoPacienteController::class, 'CrearTratamiento']);
 Route::get('/tratamiento/{tratamiento}/sesiones', [TratamientoPacienteController::class, 'GetTratamientoSesion']);
 Route::post('/tratamiento/{tratamiento}/sesiones', [SesionTratamientoController::class, 'CrearSesion']);
+Route::get('/tratamientos-get', [TratamientoPacienteController::class, 'TratamientosGet']);
+Route::get('/sesiones-get', [TratamientoPacienteController::class, 'SesionesGet']);
 
 /*
 |--------------------------------------------------------------------------
