@@ -12,6 +12,7 @@ use App\Http\Controllers\PagoController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\ReporteController;
+use App\Http\Controllers\CajaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -73,8 +74,10 @@ Route::get('/materiales', [ProductoController::class, 'index'])
     ->middleware(['auth', 'role:admin']);
 
 Route::get('/calendar', [CalendarController::class, 'index'])
-    ->name('admin.calendar')
-    ->middleware(['auth', 'role:admin']);
+    ->name('admin.calendar');
+
+Route::get('/reportes', [ReporteController::class, 'index'])
+    ->name('admin.reportes');
 
 Route::get('/usuarios-get', [DoctorController::class, 'GetUsuarios']);
 Route::post('/usuarios-create', [DoctorController::class, 'create']);
@@ -106,6 +109,8 @@ Route::post('/cambiar-sucursal', function (Illuminate\Http\Request $request) {
 
     
 Route::get('/listas-pacientes', [DoctorController::class, 'lista'])->name('doctor.lista');
+Route::get('/cajas', [CajaController::class, 'index'])->name('admin.cajas');
+Route::get('/cajas-admin', [CajaController::class, 'CajaAdmin'])->name('admin.AdminCaja');
 Route::get('/buscar-pacientes', [PacienteController::class, 'buscar']);
 Route::get('/paciente/{id}', [PacienteController::class, 'show']);
 Route::post('/pacientes', [PacienteController::class, 'CrearPaciente']);
@@ -119,7 +124,8 @@ Route::get('/tratamiento/{tratamiento}/sesiones', [TratamientoPacienteController
 Route::post('/tratamiento/{tratamiento}/sesiones', [SesionTratamientoController::class, 'CrearSesion']);
 Route::get('/tratamientos-get', [TratamientoPacienteController::class, 'TratamientosGet']);
 Route::get('/sesiones-get', [TratamientoPacienteController::class, 'SesionesGet']);
-
+Route::get('/tratamientos-select/{tratamientoId}', [TratamientoPacienteController::class, 'TratamientosSelect']);
+Route::post('/tratamientos/{id}/concluir', [TratamientoPacienteController::class, 'concluir'])->name('tratamientos.concluir');
 /*
 |--------------------------------------------------------------------------
 | firma digital
@@ -138,3 +144,14 @@ Route::get('/materiales-get', [ProductoController::class, 'GetMateriales']);
 Route::put('/materiales/{id}', [ProductoController::class, 'update']);
 Route::post('/materiales-store', [ProductoController::class, 'CrearMaterial']);
 Route::post('/materiales/asignar-sucursales', [ProductoController::class, 'asignarSucursales']);
+Route::get('/filtrar-datos-caja-Efectivo', [CajaController::class, 'FiltrarCajaEfectivo']);
+Route::post('/movimientos-caja/egreso', [CajaController::class, 'registrarEgreso']);
+Route::get('/filtrar-datos-caja-Deposito', [CajaController::class, 'FiltrarCajaDeposito']);
+Route::get('/filtrar-datos-caja-Tarjeta', [CajaController::class, 'FiltrarCajaTarjeta']);
+Route::get('/filtrar-datos-caja-Efectivo-admin', [CajaController::class, 'FiltrarCajaEfectivoAdmin']);
+Route::get('/filtrar-datos-caja-Deposito-admin', [CajaController::class, 'FiltrarCajaDepositoAdmin']);
+Route::get('/filtrar-datos-caja-Tarjeta-admin', [CajaController::class, 'FiltrarCajaTarjetaAdmin']);
+
+
+/**REportes */
+Route::post('/reporte-grafico-ingreso', [ReporteController::class, 'graficoIngresos']);

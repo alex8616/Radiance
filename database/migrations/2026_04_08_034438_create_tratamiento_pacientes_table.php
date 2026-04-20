@@ -15,10 +15,7 @@ return new class extends Migration
             $table->foreignId('doctor_id')->constrained('doctores')->cascadeOnDelete();
             $table->foreignId('sucursal_id')->constrained('sucursales')->cascadeOnDelete();
 
-            // 🔥 RELACIÓN CORRECTA
-            $table->foreignId('categoria_id')
-                  ->constrained('categorias_tratamientos')
-                  ->cascadeOnDelete();
+            $table->foreignId('categoria_id')->constrained('categorias_tratamientos')->cascadeOnDelete();
 
             $table->text('descripcion')->nullable();
 
@@ -26,6 +23,10 @@ return new class extends Migration
             $table->date('fecha_fin_estimada')->nullable();
 
             $table->decimal('costo_total', 10, 2)->nullable();
+            
+            $table->decimal('diferencia_costo', 10, 2)->nullable();
+
+            $table->decimal('saldo_total', 10, 2)->nullable();
 
             $table->enum('estado', ['activo', 'finalizado', 'cancelado'])
                   ->default('activo');

@@ -47,4 +47,9 @@ class Sucursal extends Model
             'producto_id'
         )->withPivot('precio', 'stock')->withTimestamps();
     }
+
+    public function cajas()
+    {
+        return $this->hasMany(Caja::class);
+    }
 }

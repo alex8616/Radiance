@@ -81,12 +81,20 @@ class TratamientoPacienteController extends Controller
                     'tratamientos' => []
                 ]);
             }
-            $query->where('doctor_id', $doctor->id);
+            $query->where('doctor_id', $doctor->id)->with([
+                'paciente',
+                'categoria',
+            ]);
         }
+
+        $tratamientos = $query->with([
+                'paciente',
+                'categoria',
+            ])->get();
 
         return response()->json([
             'role' => $user->role,
-            'tratamientos' => $query->get()
+            'tratamientos' => $tratamientos
         ]);
     }
 
@@ -94,23 +102,62 @@ class TratamientoPacienteController extends Controller
         $user = Auth::user();
 
         if ($user->role === 'admin') {
-            $sesiones = SesionTratamiento::all();
+            $sesiones = SesionTratamiento::with('tratamiento')
+                                        ->with('tratamiento.paciente')
+                                        ->get();
         } 
         else if ($user->role === 'doctor') {
             $doctor = Doctor::where('user_id', $user->id)->first();
-            $tratamiento = TratamientoPaciente::where('doctor_id',$doctor->id)->first();
-            $sesion = SesionTratamiento::where('tratamiento_id', $tratamiento->id)
-                                            ->get();
-            
             $sucursalId = session('sucursal_id');
 
-            return response()->json($sucursalId);
+            $tratamientos = TratamientoPaciente::where('doctor_id', $doctor->id)->get();
 
-        } 
+            $sesiones = SesionTratamiento::whereIn('tratamiento_id', $tratamientos->pluck('id'))
+                                        ->where('sucursal_id', $sucursalId)
+                                        ->with('tratamiento')
+                                        ->with('tratamiento.paciente')
+                                        ->get();
+
+            return response()->json($sesiones);
+        }
         else {
             $sesiones = collect();
         }
 
         return response()->json($sesiones);
+    }
+
+    public function TratamientosSelect($tratamientoId){
+        $tratamiento = TratamientoPaciente::with([
+                                            'paciente',
+                                            'doctor',
+                                            'sucursal',
+                                            'categoria',
+                                            'sesiones',
+                                            'pagos',
+                                            'sesiones.productos.producto'
+                                        ])->find($tratamientoId);
+
+        if (!$tratamiento) {
+            return response()->json(['error' => 'Tratamiento no encontrado'], 404);
+        }
+
+        return response()->json($tratamiento);
+    }
+
+    public function concluir($id){
+        $tratamiento = TratamientoPaciente::findOrFail($id);
+        if ($tratamiento->costo_total == $tratamiento->saldo_total) {
+            $tratamiento->estado = 'finalizado';
+            $tratamiento->fecha_fin_estimada = now();
+            $tratamiento->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Tratamiento concluido correctamente.'
+            ]);
+        }
+
+        return response()->json($tratamiento->paciente_id);
     }
 }

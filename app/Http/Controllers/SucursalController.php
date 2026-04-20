@@ -11,10 +11,8 @@ class SucursalController extends Controller
     }
 
     public function create(Request $request){
-        //return response()->json($request->all());
         $coordenadas = explode(',', $request->ubicacion);
 
-        // Validación básica
         if (count($coordenadas) !== 2) {
             return response()->json([
                 'error' => 'Formato de ubicación inválido'
@@ -24,7 +22,7 @@ class SucursalController extends Controller
         $latitud = (float) trim($coordenadas[0]);
         $longitud = (float) trim($coordenadas[1]);
 
-        // Guardar usando el modelo
+        // Guardar sucursal
         $sucursal = Sucursal::create([
             'nombre' => $request->nombre,
             'direccion' => $request->direccion,
@@ -33,11 +31,19 @@ class SucursalController extends Controller
             'longitud' => $longitud
         ]);
 
+        // 🔥 Crear caja automáticamente
+        $sucursal->cajas()->create([
+            'nombre' => 'Caja '. $request->nombre,
+            'descripcion' => 'Caja creada automáticamente para la sucursal '. $request->nombre,
+            'saldo_inicial' => 0
+        ]);
+
         return response()->json([
-            'message' => 'Sucursal guardada correctamente',
-            'data' => $sucursal
+            'message' => 'Sucursal guardada correctamente con su caja principal',
+            'data' => $sucursal->load('cajas') // devuelve también la caja creada
         ]);
     }
+
 
     public function GetSucursales(){
         $sucursales = Sucursal::get();

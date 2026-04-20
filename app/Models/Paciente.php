@@ -37,4 +37,9 @@ class Paciente extends Model
         return $this->hasOne(AntecedenteMedico::class, 'paciente_id');
     }
 
+    public function movimientosCaja()
+    {
+        return $this->hasMany(MovimientoCaja::class);
+    }
+
 }

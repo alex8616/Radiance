@@ -149,6 +149,7 @@ class PacienteController extends Controller
 
     public function PacientesTratamientos($pacienteId){
         $tratamientos = TratamientoPaciente::where('paciente_id', $pacienteId)
+                        ->where('estado', 'activo')    
                         ->with([
                             'categoria',
                             'paciente',

@@ -120,7 +120,15 @@
               <li class="nav-item dropdown">
                   <a class="nav-link pl-lg-2" href="{{ route('doctor.lista') }}"><span class="ml-1">Inicio</span></a>
               </li>
+              @if(auth()->user()->role === 'doctor')
+              <li class="nav-item dropdown">
+                  <a class="nav-link pl-lg-2" href="{{ route('admin.cajas') }}"><span class="ml-1">Cajas</span></a>
+              </li>
+              @endif
               @if(auth()->user()->role === 'admin')
+              <li class="nav-item dropdown">
+                  <a class="nav-link pl-lg-2" href="{{ route('admin.AdminCaja') }}"><span class="ml-1">Cajas</span></a>
+              </li>
               <li class="nav-item dropdown">
                   <a class="dropdown-toggle nav-link pl-lg-3" href="{{ route('sucursales.index') }}">
                       Sucursales
@@ -142,39 +150,11 @@
                   </a>
               </li>
               @endif
-              <li class="nav-item dropdown">
-                <a href="#" id="formsDropdown" class="dropdown-toggle nav-link" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  <span class="ml-lg-2">Pacientes</span>
-                </a>
-                <div class="dropdown-menu" aria-labelledby="formsDropdown">
-                  <a class="nav-link pl-lg-2" href="./form_elements.html"><span class="ml-1">Basic Elements</span></a>
-                  <a class="nav-link pl-lg-2" href="./form_advanced.html"><span class="ml-1">Advanced Elements</span></a>
-                  <a class="nav-link pl-lg-2" href="./form_validation.html"><span class="ml-1">Validation</span></a>
-                  <a class="nav-link pl-lg-2" href="./form_layouts.html"><span class="ml-1">Layouts</span></a>
-                  <a class="nav-link pl-lg-2" href="./form_upload.html"><span class="ml-1">File upload</span></a>
-                </div>
-              </li>
-              <li class="nav-item dropdown">
-                <a href="#" id="tablesDropdown" class="dropdown-toggle nav-link" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  <span class="ml-lg-2">Doctores</span>
-                </a>
-                <div class="dropdown-menu" aria-labelledby="tablesDropdown">
-                  <a class="nav-link pl-lg-2" href="./table_basic.html"><span class="ml-1">Basic Tables</span></a>
-                  <a class="nav-link pl-lg-2" href="./table_advanced.html"><span class="ml-1">Advanced Tables</span></a>
-                  <a class="nav-link pl-lg-2" href="./table_datatables.html"><span class="ml-1">Data Tables</span></a>
-                </div>
-              </li>
               @if(auth()->user()->role === 'admin')
               <li class="nav-item dropdown">
-                  <a class="dropdown-toggle nav-link pl-lg-3" href="#" id="chartsDropdown" role="button" data-toggle="dropdown">
+                  <a class="dropdown-toggle nav-link pl-lg-3" href="{{ route('admin.reportes') }}">
                       Reportes
                   </a>
-                  <ul class="dropdown-menu">
-                      <a class="nav-link pl-lg-2" href="/reportes/inline"><span class="ml-1">Inline Chart</span></a>
-                      <a class="nav-link pl-lg-2" href="/reportes/chartjs"><span class="ml-1">Chartjs</span></a>
-                      <a class="nav-link pl-lg-2" href="/reportes/apex"><span class="ml-1">ApexCharts</span></a>
-                      <a class="nav-link pl-lg-2" href="/reportes/mapas"><span class="ml-1">Datamaps</span></a>
-                  </ul>
               </li>
               @endif
             </ul>

@@ -243,7 +243,7 @@
 
             nuevaFila.innerHTML = `
                 <div class="col-md-7">
-                    <select class="form-control">
+                    <select class="form-control metodo">
                         <option value="efectivo">Efectivo</option>
                         <option value="qr">QR/Deposito</option>
                         <option value="tarjeta">Tarjeta</option>
@@ -1864,7 +1864,7 @@ $('#btnGuardarProductos').click(function () {
                                         </div>
 
                                         <!-- BODY -->
-                                        <div id="collapse${index}" class="collapse show" data-parent="#accordion${index}">
+                                        <div id="collapse${index}" class="collapse" data-parent="#accordion${index}">
                                             <div class="card-body"> 
                                                 
                                                 ${t.descripcion ?? ''} <br><br>
@@ -1885,31 +1885,40 @@ $('#btnGuardarProductos').click(function () {
                                                         Adelanto
                                                     </a>
                                                 </div>
+
+                                                <!-- 🔥 PAGOS -->
+                                                <br>
+                                                <div class="card shadow">
+
+                                                    <div class="card-header d-flex justify-content-between align-items-center" style="background: #2E383F">
+                                                        <h5 class="mb-0" style="color: white">Sub Total Tratamiento</h5>
+                                                        <h5 class="mb-0" style="color: white">${t.costo_total ?? 0} Bs.</h5>
+                                                    </div>
+
+                                                    <div id="contenedorPagos">
+                                                        ${pagosHTML}
+                                                    </div>
+
+                                                    <div class="card-header d-flex justify-content-between align-items-center" style="background: #2E383F">
+                                                        <h5 class="mb-0" style="color: white">
+                                                            Total Deuda
+                                                        </h5>
+                                                        <h5 class="mb-0" style="color: white">
+                                                            ${t.diferencia_costo ?? 0} Bs.
+                                                        </h5>
+                                                    </div>
+
+                                                    ${(t.costo_total == t.saldo_total) ? `
+                                                        <div class="mt-2 text-center" style="padding:10px;">
+                                                            <a href="#" class="btn btn-success btn-sm btnConcluirTratamiento" 
+                                                            data-tratamiento-id="${t.id}" style="width:100%;">
+                                                            Concluir Tratamiento
+                                                            </a>
+                                                        </div>
+                                                    ` : ``}
+                                                </div>
                                             </div>
-                                        </div>
-
-                                        <!-- 🔥 PAGOS -->
-                                        <div class="card-body">
-                                            <div class="card shadow">
-
-                                                <div class="card-header d-flex justify-content-between align-items-center" style="background: #2E383F">
-                                                    <h5 class="mb-0" style="color: white">Pagos</h5>
-                                                </div>
-
-                                                <div id="contenedorPagos">
-                                                    ${pagosHTML}
-                                                </div>
-
-                                                <div class="card-header d-flex justify-content-between align-items-center" style="background: #2E383F">
-                                                    <h5 class="mb-0" style="color: white">
-                                                        Total
-                                                    </h5>
-                                                    <h5 class="mb-0" style="color: white">
-                                                        ${totalPagos.toFixed(2)} Bs.
-                                                    </h5>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        </div>                                        
 
                                     </div>
                                 </div>
@@ -1920,6 +1929,32 @@ $('#btnGuardarProductos').click(function () {
 
                     div.innerHTML = html;
 
+                    // Concluir tratamiento
+                    $(document).on('click', '.btnConcluirTratamiento', function(e) {
+                        e.preventDefault();
+
+                        let tratamientoId = $(this).data('tratamiento-id');
+
+                        toastConfirm("¿Seguro que deseas concluir este tratamiento?", () => {
+                            $.ajax({
+                                url: `/tratamientos/${tratamientoId}/concluir`,
+                                type: 'POST',
+                                data: {
+                                    _token: $('meta[name="csrf-token"]').attr('content')
+                                },
+                                success: function(response) {
+                                    toastSuccess("Tratamiento concluido correctamente");
+                                    cargarTratamientos(response);
+                                    mostrarEstadoEspera();
+                                },
+                                error: function(xhr) {
+                                    generarToastConfirm("Error", "Ocurrió un error al concluir el tratamiento.", null, null);
+                                }
+                            });
+                        }, () => {
+                            console.log("El usuario canceló la acción.");
+                        });
+                    });
                 } else {
                     div.innerHTML = `<div class="alert alert-warning">Este paciente no tiene tratamientos en proceso.</div>`;
                 }

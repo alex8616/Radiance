@@ -17,6 +17,8 @@ class TratamientoPaciente extends Model
         'fecha_inicio',
         'fecha_fin_estimada',
         'costo_total',
+        'diferencia_costo',
+        'saldo_total',
         'estado'
     ];
 
@@ -50,6 +52,11 @@ class TratamientoPaciente extends Model
     public function pagos()
     {
         return $this->hasMany(Pago::class, 'tratamiento_id');
+    }
+
+    public function movimientosCaja()
+    {
+        return $this->hasMany(MovimientoCaja::class, 'tratamiento_id');
     }
     
 }

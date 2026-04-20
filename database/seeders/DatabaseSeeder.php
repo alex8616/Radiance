@@ -30,7 +30,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         //crear sucursales
-        Sucursal::create([
+        /*Sucursal::create([
             'nombre' => 'Sucursal Central',
             'direccion' => 'Av. Principal 123',
             'telefono' => '70000000',
@@ -44,7 +44,7 @@ class DatabaseSeeder extends Seeder
             'telefono' => '70000002',
             'latitud' => -16.500000,
             'longitud' => -68.150000,
-        ]);
+        ]);*/
 
         //crear doctores
         Doctor::create([
@@ -55,8 +55,8 @@ class DatabaseSeeder extends Seeder
         ]);
 
         //crear relación doctor-sucursal
-        $doctor = Doctor::find(1);
-        $doctor->sucursales()->attach(1);
+        //$doctor = Doctor::find(1);
+        //$doctor->sucursales()->attach(1);
 
         //crear pacientes
         Paciente::create([

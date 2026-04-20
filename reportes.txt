@@ -1,0 +1,98 @@
+📊 REPORTES DEL SISTEMA
+
+💰 1. REPORTES FINANCIEROS
+
+- Ingresos por día
+- Ingresos por mes
+- Ingresos por rango de fechas
+- Ingresos por sucursal
+- Ingresos por doctor
+
+- Egresos por día
+- Egresos por mes
+- Egresos por rango de fechas
+- Egresos por sucursal
+- Detalle de gastos
+
+- Utilidad diaria
+- Utilidad mensual
+- Utilidad por sucursal
+- Utilidad por rango de fechas
+
+- Flujo de caja
+- Movimientos de caja
+- Balance inicial y final
+- Historial de caja
+
+🏪 2. REPORTES POR SUCURSAL
+
+- Ingresos por sucursal
+- Egresos por sucursal
+- Utilidad por sucursal
+- Pacientes atendidos por sucursal
+- Tratamientos realizados por sucursal
+
+👨‍⚕️ 3. REPORTES POR DOCTOR
+
+- Pacientes atendidos por doctor
+- Tratamientos realizados por doctor
+- Ingresos generados por doctor
+- Sesiones realizadas por doctor
+- Ranking de doctores
+
+👥 4. REPORTES DE PACIENTES
+
+- Pacientes nuevos por fecha
+- Pacientes frecuentes
+- Historial de tratamientos por paciente
+- Historial de pagos por paciente
+- Pacientes con deudas
+
+🧾 5. REPORTES DE TRATAMIENTOS
+
+- Tratamientos más realizados
+- Tratamientos por doctor
+- Tratamientos por sucursal
+- Ingresos por tipo de tratamiento
+- Estado de tratamientos (activos / finalizados)
+
+💳 6. REPORTES DE PAGOS
+
+- Pagos realizados
+- Pagos por método (efectivo, transferencia, etc.)
+- Pagos por fecha
+- Pagos por paciente
+- Pagos pendientes
+
+📦 7. REPORTES DE PRODUCTOS / INVENTARIO
+
+- Productos más utilizados
+- Consumo por sucursal
+- Stock actual por sucursal
+- Movimientos de inventario
+- Productos sin stock
+
+📅 8. FILTROS GENERALES (PARA TODOS LOS REPORTES)
+
+- Por día
+- Por semana
+- Por mes
+- Por año
+- Por rango personalizado
+
+📊 9. DASHBOARD (RESUMEN GENERAL)
+
+- Total de ingresos
+- Total de egresos
+- Utilidad total
+- Pacientes atendidos
+- Tratamientos realizados
+- Ticket promedio
+
+🚀 EXTRA (NIVEL AVANZADO)
+
+- Tendencia de ingresos
+- Comparación mensual
+- Crecimiento por sucursal
+- Proyección de ingresos
+- Horas pico de atención
