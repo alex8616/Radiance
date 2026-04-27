@@ -491,7 +491,7 @@
             $("#ContenidoDivPaciente").html(`
                 <div class="card shadow-sm">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">Atender Paciente</h5>
+                        <h5 class="mb-0">Atender Paciente</h5>                        
                         <a href="#" class="btn btn-sm btn-outline-primary" id="btnAgregarTratamiento" data-paciente-id="${pacienteId}">
                             Agregar tratamiento
                         </a>
@@ -1196,8 +1196,14 @@ $('#btnGuardarProductos').click(function () {
                                 <div class="tab-content" id="myTabContent">
                                     <div class="tab-pane fade show active" id="paciente" role="tabpanel">
                                        <div class="card mb-3 shadow-sm">
-                                            <div class="card-header bg-primary text-white" style="font-weight:bold;">
-                                                Información del Paciente
+                                            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center" style="font-weight:bold;">
+                                                
+                                                <span>Información del Paciente</span>
+
+                                                <a href="#" class="btn btn-sm btn-outline-light" id="btnPacienteFullExportarPDF" data-pacientefull-id="${p.id}">
+                                                    Exportar PDF
+                                                </a>
+
                                             </div>
                                             <div class="card-body">
                                                 <div class="row">
@@ -1859,6 +1865,9 @@ $('#btnGuardarProductos').click(function () {
                                                 <div class="d-flex justify-content-between align-items-center w-100">
                                                     <strong>${t.categoria?.nombre ?? 'Sin categoría'}</strong>
                                                     ${estadoHTML}
+                                                    <a href="#" class="btn btn-sm btn-outline-success me-2" id="btnExportarPDF" data-tratamiento-id="${t.id}">
+                                                        Exportar PDF
+                                                    </a>
                                                 </div>
                                             </a>
                                         </div>
@@ -2143,6 +2152,31 @@ $('#btnGuardarProductos').click(function () {
             });
         }, 3000);
     }
+</script>
+
+<script>
+    document.addEventListener('click', function(e) {
+        if (e.target.id === 'btnExportarPDF') {
+            e.preventDefault();
+
+            let tratamientoId = e.target.getAttribute('data-tratamiento-id');
+
+            let url = `/paciente-tratamiento-especifico/${tratamientoId}/pdf`;
+
+            window.open(url, '_blank');
+        }
+    });
+</script>
+<script>
+    document.addEventListener('click', function(e) {
+        if (e.target.id === 'btnPacienteFullExportarPDF') {
+            e.preventDefault();
+            let id = e.target.getAttribute('data-pacientefull-id');
+            let url = `/paciente-full/${id}/pdf`;
+            window.open(url, '_blank');
+        }
+
+    });
 </script>
 @endsection
 

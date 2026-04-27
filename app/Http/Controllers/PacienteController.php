@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\AntecedenteMedico;
 use App\Models\TratamientoPaciente;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PacienteController extends Controller
 {
@@ -162,4 +163,58 @@ class PacienteController extends Controller
                     return response()->json($tratamientos);
     }
 
+    public function exportarPacienteFullPDF($id){
+        $paciente = Paciente::with('antecedenteMedico')->find($id);
+
+        if (!$paciente) {
+            abort(404, 'Paciente no encontrado');
+        }
+
+        $tratamientos = TratamientoPaciente::where('paciente_id', $id)
+            ->with([
+                'paciente',
+                'paciente.antecedenteMedico',
+                'doctor',
+                'sucursal',
+                'categoria',
+                'sesiones.productos.producto',
+                'pagos'
+            ])
+            ->get();
+
+        /*return response()->json([
+            'paciente' => $paciente,
+            'tratamientos' => $tratamientos
+        ]);*/
+
+        $pdf = Pdf::loadView('pdf.paciente', compact('paciente', 'tratamientos'));
+
+        return $pdf->stream('paciente_' . $paciente->ci . '.pdf');
+
+    }
+
+    public function exportarTratamientoEspecificoPDF($id){
+
+        $tratamiento = TratamientoPaciente::where('id', $id)
+            ->where('estado', 'activo')
+            ->with([
+                'paciente',
+                'doctor',
+                'sucursal',
+                'categoria',
+                'sesiones.productos.producto',
+                'pagos'
+            ])
+            ->first();
+        
+        //return response()->json($tratamiento);
+
+        if (!$tratamiento) {
+            abort(404, 'Tratamiento no encontrado');
+        }
+
+        $pdf = Pdf::loadView('pdf.pacientetratamientoespecifico', compact('tratamiento'));
+
+        return $pdf->stream('tratamiento_' . $tratamiento->id . '.pdf');
+    }
 }

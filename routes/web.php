@@ -155,3 +155,5 @@ Route::get('/filtrar-datos-caja-Tarjeta-admin', [CajaController::class, 'Filtrar
 
 /**REportes */
 Route::post('/reporte-grafico-ingreso', [ReporteController::class, 'graficoIngresos']);
+Route::get('/paciente-full/{id}/pdf', [PacienteController::class, 'exportarPacienteFullPDF']);
+Route::get('/paciente-tratamiento-especifico/{id}/pdf', [PacienteController::class, 'exportarTratamientoEspecificoPDF']);
