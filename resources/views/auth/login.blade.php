@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -19,7 +18,8 @@
         body {
             font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
             min-height: 100vh;
-            background: linear-gradient(135deg, #0f2b44 0%, #1a4a6e 50%, #0b2b3f 100%);
+            /* Fondo negro elegante en lugar de azules */
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0d0d0d 100%);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -37,7 +37,7 @@
             background-image: url('https://images.unsplash.com/photo-1606811971618-4486d14f3f99?q=80&w=1974&auto=format');
             background-size: cover;
             background-position: center;
-            opacity: 0.08;
+            opacity: 0.04;
             pointer-events: none;
         }
 
@@ -48,7 +48,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.03) 0%, transparent 70%);
+            background: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.02) 0%, transparent 70%);
             pointer-events: none;
         }
 
@@ -59,7 +59,7 @@
             background: rgba(255, 255, 255, 0.98);
             border-radius: 2rem;
             overflow: hidden;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.2);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             position: relative;
             z-index: 2;
@@ -67,7 +67,7 @@
 
         .main-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.6);
         }
 
         /* Contenido de dos columnas dentro del cuadrado */
@@ -103,26 +103,19 @@
             margin-bottom: 1rem;
         }
 
-        .logo-circle {
+        /* Estilo para la imagen del logo */
+        .logo-img {
             width: 48px;
             height: 48px;
-            background: linear-gradient(145deg, #1e3a5f, #0f2b44);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 8px 16px -6px rgba(15, 43, 68, 0.2);
-        }
-
-        .logo-circle i {
-            font-size: 1.6rem;
-            color: white;
+            object-fit: contain;
+            border-radius: 12px;
         }
 
         .brand h1 {
             font-size: 1.8rem;
             font-weight: 700;
-            background: linear-gradient(135deg, #0b2b3f, #1c4e6f);
+            /* Gradiente negro/gris elegante */
+            background: linear-gradient(135deg, #1a1a1a, #333333);
             background-clip: text;
             -webkit-background-clip: text;
             color: transparent;
@@ -131,7 +124,7 @@
         .tagline {
             font-size: 0.75rem;
             font-weight: 500;
-            color: #5e7a93;
+            color: #666666;
             letter-spacing: 0.5px;
         }
 
@@ -143,12 +136,12 @@
         .form-title h2 {
             font-size: 1.5rem;
             font-weight: 700;
-            color: #1e293b;
+            color: #111111;
             margin-bottom: 0.4rem;
         }
 
         .form-title p {
-            color: #64748b;
+            color: #666666;
             font-size: 0.85rem;
         }
 
@@ -163,13 +156,13 @@
             gap: 0.5rem;
             font-size: 0.75rem;
             font-weight: 600;
-            color: #1e3a5f;
+            color: #333333;
             margin-bottom: 0.5rem;
         }
 
         .input-label i {
             font-size: 0.75rem;
-            color: #4a7c9c;
+            color: #555555;
         }
 
         .input-wrapper {
@@ -182,7 +175,7 @@
             position: absolute;
             left: 1rem;
             font-size: 0.9rem;
-            color: #94a3b8;
+            color: #999999;
             pointer-events: none;
         }
 
@@ -192,17 +185,17 @@
             font-size: 0.9rem;
             font-family: 'Inter', sans-serif;
             font-weight: 500;
-            border: 1.5px solid #e2e8f0;
+            border: 1.5px solid #e0e0e0;
             border-radius: 0.8rem;
             background: white;
             transition: all 0.25s;
             outline: none;
-            color: #0f172a;
+            color: #111111;
         }
 
         input:focus {
-            border-color: #2c6e9e;
-            box-shadow: 0 0 0 3px rgba(44, 110, 158, 0.1);
+            border-color: #333333;
+            box-shadow: 0 0 0 3px rgba(51, 51, 51, 0.1);
         }
 
         .toggle-password {
@@ -212,12 +205,12 @@
             border: none;
             cursor: pointer;
             font-size: 0.9rem;
-            color: #94a3b8;
+            color: #999999;
             transition: color 0.2s;
         }
 
         .toggle-password:hover {
-            color: #2c6e9e;
+            color: #333333;
         }
 
         /* Opciones */
@@ -233,7 +226,7 @@
             align-items: center;
             gap: 0.4rem;
             cursor: pointer;
-            color: #475569;
+            color: #555555;
             font-size: 0.8rem;
             font-weight: 500;
         }
@@ -241,11 +234,11 @@
         .remember input {
             width: 0.9rem;
             height: 0.9rem;
-            accent-color: #2c6e9e;
+            accent-color: #333333;
         }
 
         .forgot-link {
-            color: #2c6e9e;
+            color: #555555;
             text-decoration: none;
             font-size: 0.8rem;
             font-weight: 600;
@@ -253,14 +246,14 @@
         }
 
         .forgot-link:hover {
-            color: #154a6e;
+            color: #111111;
             text-decoration: underline;
         }
 
         /* Botón */
         .btn-login {
             width: 100%;
-            background: linear-gradient(105deg, #1e3a5f, #1c4e6f);
+            background: linear-gradient(105deg, #1a1a1a, #2d2d2d);
             color: white;
             border: none;
             padding: 0.8rem;
@@ -274,7 +267,7 @@
             align-items: center;
             justify-content: center;
             gap: 0.6rem;
-            box-shadow: 0 4px 12px -4px rgba(28, 78, 111, 0.3);
+            box-shadow: 0 4px 12px -4px rgba(0, 0, 0, 0.3);
         }
 
         .btn-login i {
@@ -282,9 +275,9 @@
         }
 
         .btn-login:hover {
-            background: linear-gradient(105deg, #143450, #163f59);
+            background: linear-gradient(105deg, #000000, #1a1a1a);
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px -6px rgba(28, 78, 111, 0.4);
+            box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.5);
         }
 
         .btn-login:active {
@@ -296,11 +289,11 @@
             text-align: center;
             margin-top: 1.5rem;
             padding-top: 1.2rem;
-            border-top: 1px solid #e2e8f0;
+            border-top: 1px solid #e0e0e0;
         }
 
         .register-link {
-            color: #2c6e9e;
+            color: #555555;
             text-decoration: none;
             font-weight: 600;
             font-size: 0.85rem;
@@ -313,100 +306,42 @@
         }
 
         .register-link:hover {
-            color: #0f4468;
+            color: #111111;
         }
 
-        .staff-link {
-            display: inline-block;
-            margin-top: 0.6rem;
-            font-size: 0.7rem;
-            color: #7f9ab3;
-            text-decoration: none;
-        }
-
-        .staff-link i {
-            margin-right: 0.3rem;
-        }
-
-        .staff-link:hover {
-            color: #2c6e9e;
-        }
-
-        /* Mensajes */
-        .message {
-            margin-top: 1rem;
-            padding: 0.7rem;
-            border-radius: 0.8rem;
-            font-size: 0.75rem;
-            font-weight: 500;
-            text-align: center;
-            display: none;
-        }
-
-        .message.error {
-            background: #fef2f2;
-            color: #dc2626;
-            border-left: 3px solid #dc2626;
-            display: block;
-        }
-
-        .message.success {
-            background: #f0fdf4;
-            color: #16a34a;
-            border-left: 3px solid #16a34a;
-            display: block;
-        }
-
-        /* Columna derecha - Imagen */
+        /* Columna derecha - Imagen centrada y completa */
         .login-right {
             flex: 1;
             position: relative;
-            background: #0f2b44;
+            /* Fondo negro en lugar de azul */
+            background: #0a0a0a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             overflow: hidden;
         }
 
-        .login-right img {
+        .image-container {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .centered-logo {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            display: block;
             transition: transform 0.4s ease;
         }
 
-        .main-card:hover .login-right img {
-            transform: scale(1.03);
-        }
-
-        .image-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(15, 43, 68, 0.2) 0%, rgba(28, 78, 111, 0.15) 100%);
-            pointer-events: none;
-        }
-
-        .image-caption {
-            position: absolute;
-            bottom: 1.5rem;
-            left: 0;
-            right: 0;
-            text-align: center;
-            color: white;
-            z-index: 2;
-            padding: 0.8rem;
-            background: linear-gradient(90deg, transparent, rgba(0,0,0,0.3), transparent);
-        }
-
-        .image-caption p {
-            font-size: 0.8rem;
-            font-weight: 500;
-            letter-spacing: 0.5px;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-        }
-
-        .image-caption i {
-            margin: 0 0.3rem;
+        .main-card:hover .centered-logo {
+            transform: scale(1.02);
         }
 
         /* Responsive */
@@ -420,7 +355,7 @@
             }
             
             .login-right {
-                min-height: 240px;
+                min-height: 100%;
                 order: -1;
             }
             
@@ -439,6 +374,15 @@
             .logo-wrapper {
                 justify-content: center;
             }
+            
+            .image-container {
+                padding: 1.5rem;
+            }
+            
+            .centered-logo {
+                max-width: 100%;
+                max-height: 100%;
+            }
         }
 
         @media (max-width: 480px) {
@@ -453,6 +397,15 @@
             .form-title h2 {
                 font-size: 1.3rem;
             }
+            
+            .image-container {
+                padding: 1rem;
+            }
+            
+            .centered-logo {
+                max-width: 60%;
+                max-height: 60%;
+            }
         }
     </style>
 </head>
@@ -462,17 +415,6 @@
             <!-- Columna Izquierda: Formulario -->
             <div class="login-left">
                 <div class="login-container">
-                    <div class="brand">
-                        <div class="logo-wrapper">
-                            <div class="logo-circle">
-                                <i class="fas fa-tooth"></i>
-                            </div>
-                            <div>
-                                <h1>Radiance</h1>
-                                <div class="tagline">Where your smile shines</div>
-                            </div>
-                        </div>
-                    </div>
 
                     <div class="form-title">
                         <h2>Bienvenido de vuelta</h2>
@@ -553,28 +495,20 @@
                             <i class="fas fa-sparkles"></i>
                         </button>
                     </form>
-
-                    <div class="extra-links">
-                        <a href="{{ route('register') }}" class="register-link">
-                            <i class="fas fa-user-plus"></i> Crear cuenta nueva
-                        </a><br>
-                    </div>
                 </div>
             </div>
 
-            <!-- Columna Derecha: Imagen -->
+            <!-- Columna Derecha: Imagen centrada -->
             <div class="login-right">
-                <img src="https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?q=80&w=2070&auto=format" alt="Radiance Dental Clinic - Sonrisa saludable">
-                <div class="image-overlay"></div>
-                <div class="image-caption">
-                    <p><i class="fas fa-star-of-life"></i> Excelencia en cuidado dental <i class="fas fa-star-of-life"></i></p>
+                <div class="image-container">
+                    <img src="{{ asset('imagen/LogoFinal.png') }}" alt="Radiance Dental Clinic" class="centered-logo">
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // SOLO dejar esto (mostrar/ocultar contraseña)
+        // Mostrar/ocultar contraseña
         const togglePasswordBtn = document.getElementById('togglePassword');
         const passwordInput = document.getElementById('password');
 

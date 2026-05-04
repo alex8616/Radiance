@@ -18,10 +18,10 @@ class VerificarSucursal
                     return redirect('/seleccionar-sucursal');
                 }
             } 
-            // ✅ Tiene sucursal → redirigir a raíz "/"
+            // ✅ Tiene sucursal → redirigir a listas-pacientes
             else {
-                if ($request->is('dashboard')) {
-                    return redirect('/');
+                if ($request->is('dashboard') || $request->is('/')) {
+                    return redirect('/listas-pacientes');
                 }
             }
         }

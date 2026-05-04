@@ -13,15 +13,14 @@ use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\CajaController;
+use App\Http\Controllers\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
 | RUTA PRINCIPAL
 |--------------------------------------------------------------------------
 */
-Route::get('/', function () {
-    return view('welcome');
-})->middleware(['auth', 'verified', 'sucursal.activa']);
+Route::get('/', [DashboardController::class, 'index'])->name('home')->middleware(['auth', 'verified', 'sucursal.activa']);
 
 /*
 |--------------------------------------------------------------------------
@@ -157,3 +156,5 @@ Route::get('/filtrar-datos-caja-Tarjeta-admin', [CajaController::class, 'Filtrar
 Route::post('/reporte-grafico-ingreso', [ReporteController::class, 'graficoIngresos']);
 Route::get('/paciente-full/{id}/pdf', [PacienteController::class, 'exportarPacienteFullPDF']);
 Route::get('/paciente-tratamiento-especifico/{id}/pdf', [PacienteController::class, 'exportarTratamientoEspecificoPDF']);
+Route::post('/reporte-pdf-sucursales-ingresos', [ReporteController::class, 'generarSucursalesPDF']);
+Route::post('/reporte-pdf-tratamientos-sesiones', [ReporteController::class, 'generarTratamientosSesionesPDF'])->name('reporte.tratamientos.pdf');

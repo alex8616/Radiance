@@ -32,13 +32,15 @@ class AuthenticatedSessionController extends Controller
 
         switch ($user->role) {
             case 'doctor':
-                return redirect()->intended('/');
-            
+                // 🔥 Redirección directa sin pasar por dashboard
+                return redirect()->route('doctor.lista');
+
             case 'admin':
-                return redirect()->intended('/');
+                // Puedes cambiar esto si tienes panel admin
+                return redirect('/');
 
             default:
-                return redirect()->intended('/');
+                return redirect('/');
         }
     }
 
