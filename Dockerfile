@@ -1,14 +1,17 @@
 FROM php:8.2-apache
 
-# Instalar dependencias del sistema
+# =========================
+# Dependencias del sistema
+# =========================
 RUN apt-get update && apt-get install -y \
     git curl zip unzip libzip-dev libpq-dev \
-    && docker-php-ext-install pdo pdo_mysql pdo_pgsql zip
+    && docker-php-ext-install pdo pdo_pgsql zip
 
-# Activar mod_rewrite (Laravel lo necesita)
+# =========================
+# Apache (Laravel /public)
+# =========================
 RUN a2enmod rewrite
 
-# Configurar Apache para Laravel (carpeta public)
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
@@ -17,26 +20,46 @@ RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' \
     /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
-# Instalar Composer
+# =========================
+# Composer
+# =========================
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+# =========================
 # Copiar proyecto
+# =========================
 COPY . /var/www/html/
 
 WORKDIR /var/www/html
 
-# Permisos necesarios
+# =========================
+# Permisos Laravel
+# =========================
 RUN chmod -R 775 storage bootstrap/cache
 
-# Instalar dependencias Laravel
+# =========================
+# Instalar dependencias
+# =========================
 RUN composer install --no-interaction --optimize-autoloader --no-dev
 
-# Limpiar caches (evita errores 500)
+# =========================
+# Limpiar cache (IMPORTANTE)
+# =========================
 RUN php artisan config:clear || true
 RUN php artisan cache:clear || true
 RUN php artisan route:clear || true
 
+# =========================
+# Optimizar en producción
+# =========================
+RUN php artisan config:cache || true
+RUN php artisan route:cache || true
+
+# =========================
 # Permisos finales
+# =========================
 RUN chown -R www-data:www-data /var/www/html
 
 EXPOSE 80
+
+CMD ["apache2-foreground"]
