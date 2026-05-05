@@ -34,20 +34,19 @@ COPY . /var/www/html/
 # =========================
 # Instalar dependencias
 # =========================
-# Instalamos sin ejecutar scripts de Laravel aún para evitar errores de entorno
 RUN composer install --no-interaction --optimize-autoloader --no-dev --no-scripts
 
 # =========================
-# Permisos finales (CRÍTICO)
+# Permisos (Asegurando storage y cache)
 # =========================
-# Cambiamos el dueño a www-data y damos permisos de escritura a storage y cache
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
 EXPOSE 80
 
 # =========================
-# Comando de Inicio
+# Comando de Inicio Seguro
 # =========================
-# Limpiamos caché en tiempo de ejecución para asegurar que lea las variables de Render
-CMD php artisan optimize:clear && apache2-foreground
+# 1. Limpiamos solo configuración y vistas (que no requieren DB)
+# 2. Iniciamos Apache
+CMD php artisan config:clear && php artisan view:clear && apache2-foreground
