@@ -28,38 +28,26 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # =========================
 # Copiar proyecto
 # =========================
-COPY . /var/www/html/
-
 WORKDIR /var/www/html
-
-# =========================
-# Permisos Laravel
-# =========================
-RUN chmod -R 775 storage bootstrap/cache
+COPY . /var/www/html/
 
 # =========================
 # Instalar dependencias
 # =========================
-RUN composer install --no-interaction --optimize-autoloader --no-dev
+# Instalamos sin ejecutar scripts de Laravel aún para evitar errores de entorno
+RUN composer install --no-interaction --optimize-autoloader --no-dev --no-scripts
 
 # =========================
-# Limpiar cache (IMPORTANTE)
+# Permisos finales (CRÍTICO)
 # =========================
-RUN php artisan config:clear || true
-RUN php artisan cache:clear || true
-RUN php artisan route:clear || true
-
-# =========================
-# Optimizar en producción
-# =========================
-RUN php artisan config:cache || true
-RUN php artisan route:cache || true
-
-# =========================
-# Permisos finales
-# =========================
-RUN chown -R www-data:www-data /var/www/html
+# Cambiamos el dueño a www-data y damos permisos de escritura a storage y cache
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
 EXPOSE 80
 
-CMD ["apache2-foreground"]
+# =========================
+# Comando de Inicio
+# =========================
+# Limpiamos caché en tiempo de ejecución para asegurar que lea las variables de Render
+CMD php artisan optimize:clear && apache2-foreground
