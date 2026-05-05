@@ -19,6 +19,9 @@
                         <div class="row g-3">
                             <div class="col-md-12">
                                 <!-- FILTROS -->
+                                <div class="header">
+                                    <h3> Sucursales</h3>
+                                </div>
                                 <div class="row mb-3">
                                     <div class="col-md-4">
                                         <label>Fecha Inicio</label>
@@ -62,6 +65,9 @@
                         <div class="row g-3">
                             <div class="col-md-12">
                                 <!-- FILTROS -->
+                                <div class="header">
+                                    <h3>Atenciones</h3>
+                                </div>
                                 <div class="row mb-3">
                                     <div class="col-md-3">
                                         <label>Fecha Inicio</label>

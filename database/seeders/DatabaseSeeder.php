@@ -24,10 +24,6 @@ class DatabaseSeeder extends Seeder
             'nombre' => 'Ortodoncia',
             'descripcion' => 'Tratamientos relacionados con la ortodoncia.'
         ]);
-        CategoriaTratamiento::create([
-            'nombre' => 'Fisioterapia',
-            'descripcion' => 'Tratamientos relacionados con la fisioterapia.'
-        ]);
 
         //crear sucursales
         /*Sucursal::create([

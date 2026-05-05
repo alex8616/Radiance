@@ -182,10 +182,7 @@ class PacienteController extends Controller
             ])
             ->get();
 
-        /*return response()->json([
-            'paciente' => $paciente,
-            'tratamientos' => $tratamientos
-        ]);*/
+        //return response()->json($tratamientos);
 
         $pdf = Pdf::loadView('pdf.paciente', compact('paciente', 'tratamientos'));
 

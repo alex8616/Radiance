@@ -145,6 +145,11 @@
                   </a>
               </li>
               <li class="nav-item dropdown">
+                  <a class="dropdown-toggle nav-link pl-lg-3" href="{{ route('admin.categorias') }}">
+                      Categorias
+                  </a>
+              </li>
+              <li class="nav-item dropdown">
                   <a class="dropdown-toggle nav-link pl-lg-3" href="{{ route('admin.calendar') }}">
                       Calendario
                   </a>

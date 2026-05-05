@@ -17,9 +17,7 @@ class ProductoController extends Controller
     public function GetProductos(){
 
         $sucursalId = session('sucursal_id');
-        
         //return response()->json($sucursalId);
-
         $productos = ProductoSucursal::where('sucursal_id', $sucursalId)
             ->with('producto')
             ->get();

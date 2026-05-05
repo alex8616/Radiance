@@ -14,6 +14,7 @@ use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\CajaController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\CategoriaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -70,6 +71,10 @@ Route::get('/usuarios', [DoctorController::class, 'index'])
 
 Route::get('/materiales', [ProductoController::class, 'index'])
     ->name('admin.materiales')
+    ->middleware(['auth', 'role:admin']);
+
+Route::get('/categorias', [CategoriaController::class, 'index'])
+    ->name('admin.categorias')
     ->middleware(['auth', 'role:admin']);
 
 Route::get('/calendar', [CalendarController::class, 'index'])
@@ -158,3 +163,7 @@ Route::get('/paciente-full/{id}/pdf', [PacienteController::class, 'exportarPacie
 Route::get('/paciente-tratamiento-especifico/{id}/pdf', [PacienteController::class, 'exportarTratamientoEspecificoPDF']);
 Route::post('/reporte-pdf-sucursales-ingresos', [ReporteController::class, 'generarSucursalesPDF']);
 Route::post('/reporte-pdf-tratamientos-sesiones', [ReporteController::class, 'generarTratamientosSesionesPDF'])->name('reporte.tratamientos.pdf');
+Route::post('/Categoria-Tratamiento-store', [CategoriaController::class, 'CrearCategoria']);
+Route::get('/categoria-Tratamiento-get', [CategoriaController::class, 'GetCategorias']);
+Route::put('/Categoria-Tratamiento/{id}', [CategoriaController::class, 'update']);
+
