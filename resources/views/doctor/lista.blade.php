@@ -340,7 +340,7 @@
                 console.log(response);
                 toastSuccess("Pagos registrados correctamente");
                 $("#ModalAdelantoTratamiento").modal("hide");
-                cargarTratamientos(response);
+                cargarTratamientos(response.paciente_id);
                 $(".monto").val(0);
                 $("#totalPagos").text("0");
 
@@ -467,6 +467,9 @@
         });
 
         $(document).on("click", ".btnVerPaciente", function() {
+            // 🔥 Limpiar el ID del acordeón al cambiar de paciente
+            acordeonAbiertoId = null;
+
             // 1. Obtener los datos del botón seleccionado
             const pacienteId = $(this).data("id");
             const nombreCompleto = $(this).data("nombre") + " " + $(this).data("apellido-paterno") + " " + $(this).data("apellido-materno");
@@ -520,186 +523,186 @@
             });
 
            /**INICIO PRODUCTOS */
-let productosGlobal = [];
-let seleccionados = [];
+            let productosGlobal = [];
+            let seleccionados = [];
 
-// 🔹 ABRIR MODAL Y CARGAR PRODUCTOS
-$(document).on('click', '.btnProductos', function (e) {
-    e.preventDefault();
+            // 🔹 ABRIR MODAL Y CARGAR PRODUCTOS
+            $(document).on('click', '.btnProductos', function (e) {
+                e.preventDefault();
 
-    let sesionId = $(this).data('id');
-    let sucursalId = $(this).data('sucursal');
+                let sesionId = $(this).data('id');
+                let sucursalId = $(this).data('sucursal');
 
-    $('#ModalProductos').data('sesion-id', sesionId);
-    $('#ModalProductos').data('sucursal-id', sucursalId);
+                $('#ModalProductos').data('sesion-id', sesionId);
+                $('#ModalProductos').data('sucursal-id', sucursalId);
 
-    $('#sesion_id').val(sesionId);
+                $('#sesion_id').val(sesionId);
 
-    // limpiar
-    seleccionados = [];
-    $('#tablaSeleccionados tbody').html('');
-    $('#gridProductos').html('Cargando productos...');
+                // limpiar
+                seleccionados = [];
+                $('#tablaSeleccionados tbody').html('');
+                $('#gridProductos').html('Cargando productos...');
 
-    $.ajax({
-        url: '/productos-get',
-        type: 'GET',
-        dataType: 'json',
-        data: {
-            sucursal_id: sucursalId // 🔥 CLAVE
-        },
-        success: function(productos) {
-            productosGlobal = productos;
-            renderProductos(productosGlobal);
-        },
-        error: function() {
-            $('#gridProductos').html('Error al cargar productos');
-        }
-    });
+                $.ajax({
+                    url: '/productos-get',
+                    type: 'GET',
+                    dataType: 'json',
+                    data: {
+                        sucursal_id: sucursalId // 🔥 CLAVE
+                    },
+                    success: function(productos) {
+                        productosGlobal = productos;
+                        renderProductos(productosGlobal);
+                    },
+                    error: function() {
+                        $('#gridProductos').html('Error al cargar productos');
+                    }
+                });
 
-    $('#ModalProductos').modal('show');
-});
-
-
-// 🔹 RENDER GRID PRODUCTOS
-function renderProductos(lista) {
-    let html = '';
-
-    lista.forEach(p => {
-        html += `
-            <div class="col-6 col-md-4 col-lg-3 mb-3">
-                <div class="card producto-card shadow-sm border-0 h-100"
-                    data-id="${p.id}" 
-                    data-nombre="${p.producto.nombre}"
-                    data-precio="${p.precio}">
-
-                    <div class="card-body d-flex align-items-center justify-content-center text-center">
-                        <span class="fw-semibold text-dark">
-                            ${p.producto.nombre}
-                        </span>
-                    </div>
-
-                </div>
-            </div>
-        `;
-    });
-
-    $('#gridProductos').html(html);
-}
+                $('#ModalProductos').modal('show');
+            });
 
 
-// 🔹 CLICK EN PRODUCTO (AGREGAR)
-$(document).on('click', '.producto-card', function () {
+            // 🔹 RENDER GRID PRODUCTOS
+            function renderProductos(lista) {
+                let html = '';
 
-    let id = $(this).data('id'); // 🔥 producto_sucursal_id
-    let nombre = $(this).data('nombre');
-    let precio = $(this).data('precio');
+                lista.forEach(p => {
+                    html += `
+                        <div class="col-6 col-md-4 col-lg-3 mb-3">
+                            <div class="card producto-card shadow-sm border-0 h-100"
+                                data-id="${p.id}" 
+                                data-nombre="${p.producto.nombre}"
+                                data-precio="${p.precio}">
 
-    // evitar duplicados
-    let existe = seleccionados.find(p => p.id == id);
-    if (existe) return;
+                                <div class="card-body d-flex align-items-center justify-content-center text-center">
+                                    <span class="fw-semibold text-dark">
+                                        ${p.producto.nombre}
+                                    </span>
+                                </div>
 
-    seleccionados.push({
-        id: id,
-        nombre: nombre,
-        precio: precio,
-        cantidad: 1
-    });
+                            </div>
+                        </div>
+                    `;
+                });
 
-    $(this).addClass('active');
-
-    renderSeleccionados();
-});
-
-
-// 🔹 RENDER TABLA DERECHA
-function renderSeleccionados() {
-
-    let html = '';
-
-    seleccionados.forEach((p, index) => {
-        html += `
-            <tr>
-                <td>${p.nombre}</td>
-                <td>
-                    <input type="text" 
-                        value="${p.detalle || ''}" 
-                        placeholder="Ej: 1 litro, 2 unidades..."
-                        class="form-control detalleSel" 
-                        data-index="${index}">
-                </td>
-                <td>
-                    <button class="btn btn-sm btn-danger eliminarSel" data-index="${index}">X</button>
-                </td>
-            </tr>
-        `;
-    });
-
-    $('#tablaSeleccionados tbody').html(html);
-}
+                $('#gridProductos').html(html);
+            }
 
 
-// 🔹 ELIMINAR PRODUCTO
-$(document).on('click', '.eliminarSel', function () {
-    let index = $(this).data('index');
-    let producto = seleccionados[index];
+            // 🔹 CLICK EN PRODUCTO (AGREGAR)
+            $(document).on('click', '.producto-card', function () {
 
-    $(`.producto-card[data-id="${producto.id}"]`).removeClass('active');
+                let id = $(this).data('id'); // 🔥 producto_sucursal_id
+                let nombre = $(this).data('nombre');
+                let precio = $(this).data('precio');
 
-    seleccionados.splice(index, 1);
-    renderSeleccionados();
-});
+                // evitar duplicados
+                let existe = seleccionados.find(p => p.id == id);
+                if (existe) return;
 
+                seleccionados.push({
+                    id: id,
+                    nombre: nombre,
+                    precio: precio,
+                    cantidad: 1
+                });
 
-// 🔹 BUSCADOR
-$(document).on('keyup', '#buscarProducto', function () {
-    let texto = $(this).val().toLowerCase();
+                $(this).addClass('active');
 
-    let filtrados = productosGlobal.filter(p =>
-        p.producto.nombre.toLowerCase().includes(texto)
-    );
-
-    renderProductos(filtrados);
-});           
-
-
-// 🔹 GUARDAR DETALLE
-$(document).on('input', '.detalleSel', function () {
-    let index = $(this).data('index');
-    seleccionados[index].detalle = $(this).val();
-});
+                renderSeleccionados();
+            });
 
 
-// 🔹 GUARDAR PRODUCTOS EN SESIÓN
-$('#btnGuardarProductos').click(function () {
-    let sesionId = $('#ModalProductos').data('sesion-id');
+            // 🔹 RENDER TABLA DERECHA
+            function renderSeleccionados() {
 
-    let productos = seleccionados.map(p => ({
-        producto_sucursal_id: p.id, // 🔥 CLAVE
-        detalle: p.detalle 
-    }));
+                let html = '';
 
-    $.ajax({
-        url: `/sesiones/${sesionId}/productos`,
-        type: 'POST',
-        data: {
-            _token: $('meta[name="csrf-token"]').attr('content'),
-            productos: productos
-        },
-        success: function(resp) {
-            toastSuccess("Productos guardados en la sesión");
-            cargarsesionTratamiento(resp);
-            $('#ModalProductos').modal('hide');
-        },
-        error: function(err) {
-            console.error(err);
-            toastError("Error al guardar productos");
-        }
-    });
+                seleccionados.forEach((p, index) => {
+                    html += `
+                        <tr>
+                            <td>${p.nombre}</td>
+                            <td>
+                                <input type="text" 
+                                    value="${p.detalle || ''}" 
+                                    placeholder="Ej: 1 litro, 2 unidades..."
+                                    class="form-control detalleSel" 
+                                    data-index="${index}">
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-danger eliminarSel" data-index="${index}">X</button>
+                            </td>
+                        </tr>
+                    `;
+                });
 
-});
-/**FIN PRODUCTOS */
+                $('#tablaSeleccionados tbody').html(html);
+            }
 
-/** inisio de session */
+
+            // 🔹 ELIMINAR PRODUCTO
+            $(document).on('click', '.eliminarSel', function () {
+                let index = $(this).data('index');
+                let producto = seleccionados[index];
+
+                $(`.producto-card[data-id="${producto.id}"]`).removeClass('active');
+
+                seleccionados.splice(index, 1);
+                renderSeleccionados();
+            });
+
+
+            // 🔹 BUSCADOR
+            $(document).on('keyup', '#buscarProducto', function () {
+                let texto = $(this).val().toLowerCase();
+
+                let filtrados = productosGlobal.filter(p =>
+                    p.producto.nombre.toLowerCase().includes(texto)
+                );
+
+                renderProductos(filtrados);
+            });           
+
+
+            // 🔹 GUARDAR DETALLE
+            $(document).on('input', '.detalleSel', function () {
+                let index = $(this).data('index');
+                seleccionados[index].detalle = $(this).val();
+            });
+
+
+            // 🔹 GUARDAR PRODUCTOS EN SESIÓN
+            $('#btnGuardarProductos').click(function () {
+                let sesionId = $('#ModalProductos').data('sesion-id');
+
+                let productos = seleccionados.map(p => ({
+                    producto_sucursal_id: p.id, // 🔥 CLAVE
+                    detalle: p.detalle 
+                }));
+
+                $.ajax({
+                    url: `/sesiones/${sesionId}/productos`,
+                    type: 'POST',
+                    data: {
+                        _token: $('meta[name="csrf-token"]').attr('content'),
+                        productos: productos
+                    },
+                    success: function(resp) {
+                        toastSuccess("Productos guardados en la sesión");
+                        cargarsesionTratamiento(resp);
+                        $('#ModalProductos').modal('hide');
+                    },
+                    error: function(err) {
+                        console.error(err);
+                        toastError("Error al guardar productos");
+                    }
+                });
+
+            });
+            /**FIN PRODUCTOS */
+
+            /** inisio de session */
             // Delegar el evento porque el botón se genera dinámicamente
             $(document).on("click", "#btnAgregarSesionTratamiento", function (e) {
                 e.preventDefault();
@@ -862,7 +865,7 @@ $('#btnGuardarProductos').click(function () {
                     }
                 });
             });
-/** final de session */
+            /** final de session */
 
             // Función para volver al buscador
             function volverBuscador() {
@@ -936,37 +939,61 @@ $('#btnGuardarProductos').click(function () {
             });
 
 
-            // 🔹 SUBMIT: SOLO UNA VEZ (FUERA DEL CLICK)
             let enviando = false;
 
             $(document).on("submit", "#formTratamiento", function(e) {
                 e.preventDefault();
 
-                if (enviando) return; // 🔥 evita doble envío
+                if (enviando) return;
                 enviando = true;
 
                 const form = $(this);
                 const pacienteId = form.data("paciente-id");
                 const formData = form.serialize();
 
-                // 🔥 Desactivar botón mientras envía
-                $("#btnGuardarTratamiento").prop("disabled", true).text("Guardando...");
+                $("#btnGuardarTratamiento")
+                    .prop("disabled", true)
+                    .text("Guardando...");
 
                 $.ajax({
                     url: `/pacientes/${pacienteId}/crear-tratamientos`,
-                    type: 'POST',
+                    type: "POST",
                     data: formData,
+
                     success: function(response) {
-                        toastSuccess("Tratamiento registrado correctamente");
+                        toastSuccess(response.message || "Tratamiento registrado correctamente");
                         cargarTratamientos(pacienteId);
                     },
+
                     error: function(xhr) {
-                        alert("❌ Error al registrar tratamiento");
-                        console.error(xhr.responseText);
+
+                        let mensaje = "Ocurrió un error inesperado";
+
+                        if (xhr.responseJSON) {
+
+                            // Mensaje personalizado enviado desde Laravel
+                            if (xhr.responseJSON.message) {
+                                mensaje = xhr.responseJSON.message;
+                            }
+
+                            // Errores de validación
+                            if (xhr.responseJSON.errors) {
+                                mensaje = Object.values(xhr.responseJSON.errors)
+                                    .flat()
+                                    .join("<br>");
+                            }
+                        }
+
+                        toastError(mensaje);
+                        console.error(xhr);
                     },
+
                     complete: function() {
                         enviando = false;
-                        $("#btnGuardarTratamiento").prop("disabled", false).text("Guardar Tratamiento");
+
+                        $("#btnGuardarTratamiento")
+                            .prop("disabled", false)
+                            .text("Guardar Tratamiento");
                     }
                 });
             });
@@ -1784,6 +1811,9 @@ $('#btnGuardarProductos').click(function () {
     }
 </script>
 <script>
+    // Variable global para guardar el ID del acordeón abierto
+    let acordeonAbiertoId = null;
+
     function cargarTratamientos(pacienteId){
         fetch(`/pacientes/${pacienteId}/tratamientos`)
             .then(res => res.json())
@@ -1794,7 +1824,6 @@ $('#btnGuardarProductos').click(function () {
                     let html = ``;
 
                     data.forEach((t, index) => {
-
                         let estadoHTML = '';
                         let duracion = calcularDuracion(t.fecha_inicio, t.fecha_fin_estimada);
 
@@ -1812,14 +1841,16 @@ $('#btnGuardarProductos').click(function () {
                             </span>`;
                         }
 
+                        // Determinar si este acordeón debe estar abierto
+                        const isOpen = (acordeonAbiertoId === t.id);
+                        const collapseClass = isOpen ? 'show' : '';
+
                         // 🔥 PAGOS
                         let pagosHTML = '';
                         let totalPagos = 0;
 
                         if (t.pagos && t.pagos.length > 0) {
-
                             t.pagos.forEach(p => {
-
                                 let nombre = '';
 
                                 if (p.sesion_id === null) {
@@ -1847,7 +1878,6 @@ $('#btnGuardarProductos').click(function () {
                                     </div>
                                 `;
                             });
-
                         } else {
                             pagosHTML = `<p class="text-muted p-2">No hay pagos registrados</p>`;
                         }
@@ -1861,7 +1891,9 @@ $('#btnGuardarProductos').click(function () {
                                         
                                         <!-- HEADER -->
                                         <div class="card-header" id="heading${index}">
-                                            <a role="button" data-toggle="collapse" href="#collapse${index}">
+                                            <a role="button" data-toggle="collapse" href="#collapse${index}" 
+                                            aria-expanded="${isOpen ? 'true' : 'false'}"
+                                            aria-controls="collapse${index}">
                                                 <div class="d-flex justify-content-between align-items-center w-100">
                                                     <strong>${t.categoria?.nombre ?? 'Sin categoría'}</strong>
                                                     ${estadoHTML}
@@ -1873,7 +1905,7 @@ $('#btnGuardarProductos').click(function () {
                                         </div>
 
                                         <!-- BODY -->
-                                        <div id="collapse${index}" class="collapse" data-parent="#accordion${index}">
+                                        <div id="collapse${index}" class="collapse ${collapseClass}" data-parent="#accordion${index}" data-tratamiento-id="${t.id}">
                                             <div class="card-body"> 
                                                 
                                                 ${t.descripcion ?? ''} <br><br>
@@ -1938,13 +1970,32 @@ $('#btnGuardarProductos').click(function () {
 
                     div.innerHTML = html;
 
+                    // 🔥 EVENTO: Guardar ID del acordeón cuando se abre
+                    $('.collapse').on('shown.bs.collapse', function() {
+                        const tratamientoId = $(this).data('tratamiento-id');
+                        if (tratamientoId) {
+                            acordeonAbiertoId = tratamientoId;
+                        }
+                    });
+
+                    // 🔥 EVENTO: Limpiar ID cuando se cierra
+                    $('.collapse').on('hidden.bs.collapse', function() {
+                        const tratamientoId = $(this).data('tratamiento-id');
+                        if (tratamientoId && acordeonAbiertoId === tratamientoId) {
+                            acordeonAbiertoId = null;
+                        }
+                    });
+
                     // Concluir tratamiento
-                    $(document).on('click', '.btnConcluirTratamiento', function(e) {
+                    $(document).off('click', '.btnConcluirTratamiento').on('click', '.btnConcluirTratamiento', function(e) {
                         e.preventDefault();
 
                         let tratamientoId = $(this).data('tratamiento-id');
 
                         toastConfirm("¿Seguro que deseas concluir este tratamiento?", () => {
+                            // Guardar el ID del acordeón antes de recargar
+                            acordeonAbiertoId = tratamientoId;
+
                             $.ajax({
                                 url: `/tratamientos/${tratamientoId}/concluir`,
                                 type: 'POST',
@@ -1964,13 +2015,24 @@ $('#btnGuardarProductos').click(function () {
                             console.log("El usuario canceló la acción.");
                         });
                     });
+
+                    // Si el acordeón estaba abierto, asegurar que se muestre después de renderizar
+                    if (acordeonAbiertoId) {
+                        setTimeout(() => {
+                            // Buscar el collapse con el data-tratamiento-id correspondiente
+                            $(`.collapse[data-tratamiento-id="${acordeonAbiertoId}"]`).collapse('show');
+                        }, 200);
+                    }
+
                 } else {
                     div.innerHTML = `<div class="alert alert-warning">Este paciente no tiene tratamientos en proceso.</div>`;
+                    acordeonAbiertoId = null; // Limpiar si no hay tratamientos
                 }
             })
             .catch(err => {
                 console.error(err);
                 document.getElementById("DivTratamiento").innerHTML = `<div class="alert alert-danger">Error al cargar tratamientos.</div>`;
+                acordeonAbiertoId = null;
             });
     }
 

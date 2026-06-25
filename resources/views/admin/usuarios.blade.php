@@ -168,6 +168,8 @@
             $("#formUsuario").on("submit", function(e) {
                 e.preventDefault();
 
+                $("#btnGuardar").prop("disabled", true);
+
                 $.ajax({
                     url: '/usuarios-create',
                     type: 'POST',
@@ -176,10 +178,9 @@
                         toastSuccess("Usuario creado correctamente");
                         mostrarEstadoEspera();
                         cargarUsuarios();
-                        $("#btnGuardar").prop("disabled", true);
                     },
                     error: function(err) {
-                        console.error("Error al crear usuario:", err);
+                        $("#btnGuardar").prop("disabled", false);
                         toastError("Hubo un problema al crear el usuario");
                     }
                 });

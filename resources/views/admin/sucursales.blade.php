@@ -116,6 +116,14 @@
             $(document).on("submit", "#formSucursal", function(e) {
                 e.preventDefault();
 
+                let $btn = $(this).find('button[type="submit"]');
+
+                if ($btn.prop("disabled")) {
+                    return;
+                }
+
+                $btn.prop("disabled", true);
+
                 $.ajax({
                     url: "/sucursales-create",
                     type: "POST",
@@ -128,11 +136,11 @@
                     },
                     success: function(response) {
                         mostrarEstadoEspera();
-                        cargarSucursales()
+                        cargarSucursales();
                         toastSuccess("Registro guardado correctamente");
                     },
                     error: function(error) {
-                        console.error(error);
+                        $btn.prop("disabled", false);
                         toastError("Ocurrió un error al guardar");
                     }
                 });
