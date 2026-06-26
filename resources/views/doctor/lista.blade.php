@@ -271,7 +271,7 @@
                     e.target.closest(".pago-item").remove();
                     calcularTotal();
                 } else {
-                    alert("Debe existir al menos un pago");
+                    toastError("Debe existir al menos un pago");
                 }
             }
         });
@@ -323,7 +323,7 @@
         });
 
         if (pagos.length === 0) {
-            alert("Debe ingresar al menos un pago válido");
+            toastError("Debe ingresar al menos un pago válido");
             btn.prop("disabled", false);
             return;
         }
@@ -337,7 +337,6 @@
                 pagos: pagos
             },
             success: function (response) {
-                console.log(response);
                 toastSuccess("Pagos registrados correctamente");
                 $("#ModalAdelantoTratamiento").modal("hide");
                 cargarTratamientos(response.paciente_id);
@@ -347,7 +346,7 @@
             },
             error: function (xhr) {
                 console.error(xhr);
-                alert("❌ Error al guardar");
+                toastError("❌ Error al guardar");
             },
             complete: function () {
                 btn.prop("disabled", false);
@@ -414,7 +413,6 @@
                     type: "GET",
                     data: { search: query },
                     success: function(res) {
-                        console.log("entro al succes");
                         let html = "";
                         if (res.data.length === 0) {
                             let query = $("#buscarPaciente").val();
@@ -673,13 +671,32 @@
 
 
             // 🔹 GUARDAR PRODUCTOS EN SESIÓN
-            $('#btnGuardarProductos').click(function () {
+            let enviandoProductos = false;
+
+            // 🔹 GUARDAR PRODUCTOS EN SESIÓN (con off para evitar duplicados)
+            $(document).off('click', '#btnGuardarProductos').on('click', '#btnGuardarProductos', function () {
+                // Evitar doble envío
+                if (enviandoProductos) return;
+                enviandoProductos = true;
+
+                const $btn = $(this);
+                const textoOriginal = $btn.text();
+                $btn.prop('disabled', true).text('Guardando...');
+
                 let sesionId = $('#ModalProductos').data('sesion-id');
 
                 let productos = seleccionados.map(p => ({
-                    producto_sucursal_id: p.id, // 🔥 CLAVE
-                    detalle: p.detalle 
+                    producto_sucursal_id: p.id,
+                    detalle: p.detalle || ''
                 }));
+
+                // Validar que haya productos seleccionados
+                if (productos.length === 0) {
+                    toastError("Debe seleccionar al menos un producto.");
+                    $btn.prop('disabled', false).text(textoOriginal);
+                    enviandoProductos = false;
+                    return;
+                }
 
                 $.ajax({
                     url: `/sesiones/${sesionId}/productos`,
@@ -690,16 +707,24 @@
                     },
                     success: function(resp) {
                         toastSuccess("Productos guardados en la sesión");
-                        cargarsesionTratamiento(resp);
+                        cargarsesionTratamiento(resp); // recargar sesiones
                         $('#ModalProductos').modal('hide');
+                        // Limpiar selección
+                        seleccionados = [];
+                        $('#tablaSeleccionados tbody').html('');
                     },
                     error: function(err) {
                         console.error(err);
                         toastError("Error al guardar productos");
+                    },
+                    complete: function() {
+                        // Restaurar botón siempre
+                        $btn.prop('disabled', false).text(textoOriginal);
+                        enviandoProductos = false;
                     }
                 });
-
             });
+
             /**FIN PRODUCTOS */
 
             /** inisio de session */
@@ -810,7 +835,7 @@
                 if ($(".pago-item-sesion").length > 1) {
                     $(this).closest(".pago-item-sesion").remove();
                 } else {
-                    alert("Debe existir al menos un pago");
+                    toastError("Debe existir al menos un pago");
                 }
             });
 
@@ -825,7 +850,7 @@
                 $("#totalPagosSesion").text(total.toFixed(2));
             });
 
-            $(document).on("submit", "#formNuevaSesion", function (e) {
+            $(document).off('submit', '#formNuevaSesion').on('submit', '#formNuevaSesion', function(e) {
                 e.preventDefault();
 
                 let form = $(this);
@@ -854,9 +879,12 @@
                     type: "POST",
                     data: data,
                     success: function (response) {
+                        console.log(response);
+                        console.log("xxxxx");
+                        console.log(response.paciente_id);
                         toastSuccess("Sesión guardada correctamente");
                         cargarsesionTratamiento(tratamientoId);
-                        cargarTratamientos(response);
+                        cargarTratamientos(response.paciente_id);
                         $("#CrearDivSesion").html("");
                     },
                     error: function (xhr) {
@@ -877,7 +905,12 @@
 
             // 🔹 CLICK: Renderiza el formulario
             $(document).on("click", "#btnAgregarTratamiento", function() {
-                const pacienteId = $(this).data("paciente-id");
+                const btn = $(this);
+
+                // Bloquear el botón para que no se pueda volver a presionar
+                btn.prop("disabled", true);
+
+                const pacienteId = btn.data("paciente-id");
 
                 $("#DivTratamiento").html(`
                     <div class="card shadow-sm">
@@ -892,24 +925,29 @@
                                         <option value="">Cargando categorías...</option>
                                     </select>
                                 </div>
+
                                 <div class="form-group">
                                     <label>Descripción</label>
                                     <textarea class="form-control" name="descripcion" rows="3"></textarea>
                                 </div>
+
                                 <div class="form-row">
                                     <div class="form-group col-md-6">
                                         <label>Fecha inicio</label>
                                         <input type="date" class="form-control" name="fecha_inicio" required>
                                     </div>
+
                                     <div class="form-group col-md-6">
                                         <label>Fecha fin estimada</label>
                                         <input type="date" class="form-control" name="fecha_fin_estimada">
                                     </div>
                                 </div>
+
                                 <div class="form-group">
                                     <label>Costo total</label>
                                     <input type="number" step="0.01" class="form-control" name="costo_total" required>
                                 </div>
+
                                 <div class="text-right">
                                     <button type="submit" class="btn btn-success" id="btnGuardarTratamiento">
                                         Guardar Tratamiento
@@ -920,20 +958,25 @@
                     </div>
                 `);
 
-                // 🔥 Cargar categorías
                 $.ajax({
                     url: '/categoria-get',
                     type: 'GET',
                     dataType: 'json',
                     success: function(data) {
+
                         let options = '<option value="">Seleccione una categoría</option>';
+
                         data.forEach(cat => {
                             options += `<option value="${cat.id}">${cat.nombre}</option>`;
                         });
+
                         $("#selectCategoria").html(options);
                     },
                     error: function() {
                         $("#selectCategoria").html('<option value="">Error al cargar categorías</option>');
+
+                        // Si falla al cargar las categorías, permitir nuevamente agregar tratamiento
+                        btn.prop("disabled", false);
                     }
                 });
             });
@@ -941,10 +984,11 @@
 
             let enviando = false;
 
-            $(document).on("submit", "#formTratamiento", function(e) {
+            $(document).off('submit', '#formTratamiento').on('submit', '#formTratamiento', function(e) {
                 e.preventDefault();
 
                 if (enviando) return;
+
                 enviando = true;
 
                 const form = $(this);
@@ -961,8 +1005,16 @@
                     data: formData,
 
                     success: function(response) {
+
                         toastSuccess(response.message || "Tratamiento registrado correctamente");
+
                         cargarTratamientos(pacienteId);
+
+                        // Quitar el formulario
+                        $("#DivTratamiento").html("");
+
+                        // Volver a habilitar el botón Agregar tratamiento
+                        $("#btnAgregarTratamiento").prop("disabled", false);
                     },
 
                     error: function(xhr) {
@@ -971,12 +1023,10 @@
 
                         if (xhr.responseJSON) {
 
-                            // Mensaje personalizado enviado desde Laravel
                             if (xhr.responseJSON.message) {
                                 mensaje = xhr.responseJSON.message;
                             }
 
-                            // Errores de validación
                             if (xhr.responseJSON.errors) {
                                 mensaje = Object.values(xhr.responseJSON.errors)
                                     .flat()
@@ -985,17 +1035,24 @@
                         }
 
                         toastError(mensaje);
+
+                        // Si hubo error, permitir volver a intentar
+                        $("#btnAgregarTratamiento").prop("disabled", false);
+
                         console.error(xhr);
                     },
 
                     complete: function() {
+
                         enviando = false;
 
                         $("#btnGuardarTratamiento")
                             .prop("disabled", false)
                             .text("Guardar Tratamiento");
                     }
+
                 });
+
             });
         }
 </script>
@@ -1660,9 +1717,9 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            alert("✅ Guardado correctamente");
+                            toastSuccess("✅ Guardado correctamente");
                         } else {
-                            alert("❌ Error al guardar");
+                            toastError("❌ Error al guardar");
                         }
                     })
                     .catch(error => {
@@ -1814,14 +1871,17 @@
     // Variable global para guardar el ID del acordeón abierto
     let acordeonAbiertoId = null;
 
-    function cargarTratamientos(pacienteId){
+    function cargarTratamientos(pacienteId) {
         fetch(`/pacientes/${pacienteId}/tratamientos`)
             .then(res => res.json())
             .then(data => {
                 const div = document.getElementById("DivTratamiento");
 
                 if (data.length > 0) {
-                    let html = ``;
+                    let html = `
+                        <!-- Acordeón global único -->
+                        <div class="accordion w-100" id="accordionGlobal">
+                    `;
 
                     data.forEach((t, index) => {
                         let estadoHTML = '';
@@ -1841,7 +1901,6 @@
                             </span>`;
                         }
 
-                        // Determinar si este acordeón debe estar abierto
                         const isOpen = (acordeonAbiertoId === t.id);
                         const collapseClass = isOpen ? 'show' : '';
 
@@ -1871,7 +1930,6 @@
                                             ${nombre} <br>
                                             <small>${p.metodo_pago}</small>
                                         </div>
-
                                         <div class="col-md-5 text-right">
                                             ${monto.toFixed(2)} Bs.
                                         </div>
@@ -1882,107 +1940,107 @@
                             pagosHTML = `<p class="text-muted p-2">No hay pagos registrados</p>`;
                         }
 
-                        // 🔥 HTML FINAL
                         html += `
-                        <div class="row mb-2">
-                            <div class="col-md-12">
-                                <div class="accordion w-100" id="accordion${index}">
-                                    <div class="card shadow">
+                            <div class="card shadow mb-2">
+                                <!-- HEADER -->
+                                <div class="card-header" id="heading${index}">
+                                    <a role="button" data-toggle="collapse" href="#collapse${index}" 
+                                    aria-expanded="${isOpen ? 'true' : 'false'}"
+                                    aria-controls="collapse${index}"
+                                    data-target="#collapse${index}">
+                                        <div class="d-flex justify-content-between align-items-center w-100">
+                                            <strong>${t.categoria?.nombre ?? 'Sin categoría'}</strong>
+                                            ${estadoHTML}
+                                            <a href="#" class="btn btn-sm btn-outline-success me-2" id="btnExportarPDF" data-tratamiento-id="${t.id}">
+                                                Exportar PDF
+                                            </a>
+                                        </div>
+                                    </a>
+                                </div>
+
+                                <!-- BODY -->
+                                <div id="collapse${index}" class="collapse ${collapseClass}" 
+                                    data-parent="#accordionGlobal" 
+                                    data-tratamiento-id="${t.id}">
+                                    <div class="card-body"> 
                                         
-                                        <!-- HEADER -->
-                                        <div class="card-header" id="heading${index}">
-                                            <a role="button" data-toggle="collapse" href="#collapse${index}" 
-                                            aria-expanded="${isOpen ? 'true' : 'false'}"
-                                            aria-controls="collapse${index}">
-                                                <div class="d-flex justify-content-between align-items-center w-100">
-                                                    <strong>${t.categoria?.nombre ?? 'Sin categoría'}</strong>
-                                                    ${estadoHTML}
-                                                    <a href="#" class="btn btn-sm btn-outline-success me-2" id="btnExportarPDF" data-tratamiento-id="${t.id}">
-                                                        Exportar PDF
-                                                    </a>
-                                                </div>
+                                        ${t.descripcion ?? ''} <br><br>
+
+                                        Inicio <strong>${t.fecha_inicio ?? '-'}</strong> 
+                                        Hasta <strong>${t.fecha_fin_estimada ?? '-'}</strong> 
+                                        (${duracion}) <br><br>
+
+                                        COSTO DEL TRATAMIENTO: 
+                                        <strong>${t.costo_total ?? 0} Bs.</strong> <br><br>
+
+                                        <div class="d-flex justify-content-between align-items-center w-100">
+                                            <a href="#" class="btn btn-sm btn-outline-primary" id="btnVerTratamiento" data-paciente-id="${t.id}">
+                                                Ver Tratamiento
+                                            </a>
+
+                                            <a href="#" class="btn btn-sm btn-link btnAdelanto" data-tratamiento-id="${t.id}" data-toggle="modal" data-target="#ModalAdelantoTratamiento">
+                                                Adelanto
                                             </a>
                                         </div>
 
-                                        <!-- BODY -->
-                                        <div id="collapse${index}" class="collapse ${collapseClass}" data-parent="#accordion${index}" data-tratamiento-id="${t.id}">
-                                            <div class="card-body"> 
-                                                
-                                                ${t.descripcion ?? ''} <br><br>
-
-                                                Inicio <strong>${t.fecha_inicio ?? '-'}</strong> 
-                                                Hasta <strong>${t.fecha_fin_estimada ?? '-'}</strong> 
-                                                (${duracion}) <br><br>
-
-                                                COSTO DEL TRATAMIENTO: 
-                                                <strong>${t.costo_total ?? 0} Bs.</strong> <br><br>
-
-                                                <div class="d-flex justify-content-between align-items-center w-100">
-                                                    <a href="#" class="btn btn-sm btn-outline-primary" id="btnVerTratamiento" data-paciente-id="${t.id}">
-                                                        Ver Tratamiento
-                                                    </a>
-
-                                                    <a href="#" class="btn btn-sm btn-link btnAdelanto" data-tratamiento-id="${t.id}" data-toggle="modal" data-target="#ModalAdelantoTratamiento">
-                                                        Adelanto
-                                                    </a>
-                                                </div>
-
-                                                <!-- 🔥 PAGOS -->
-                                                <br>
-                                                <div class="card shadow">
-
-                                                    <div class="card-header d-flex justify-content-between align-items-center" style="background: #2E383F">
-                                                        <h5 class="mb-0" style="color: white">Sub Total Tratamiento</h5>
-                                                        <h5 class="mb-0" style="color: white">${t.costo_total ?? 0} Bs.</h5>
-                                                    </div>
-
-                                                    <div id="contenedorPagos">
-                                                        ${pagosHTML}
-                                                    </div>
-
-                                                    <div class="card-header d-flex justify-content-between align-items-center" style="background: #2E383F">
-                                                        <h5 class="mb-0" style="color: white">
-                                                            Total Deuda
-                                                        </h5>
-                                                        <h5 class="mb-0" style="color: white">
-                                                            ${t.diferencia_costo ?? 0} Bs.
-                                                        </h5>
-                                                    </div>
-
-                                                    ${(t.costo_total == t.saldo_total) ? `
-                                                        <div class="mt-2 text-center" style="padding:10px;">
-                                                            <a href="#" class="btn btn-success btn-sm btnConcluirTratamiento" 
-                                                            data-tratamiento-id="${t.id}" style="width:100%;">
-                                                            Concluir Tratamiento
-                                                            </a>
-                                                        </div>
-                                                    ` : ``}
-                                                </div>
+                                        <!-- PAGOS -->
+                                        <br>
+                                        <div class="card shadow">
+                                            <div class="card-header d-flex justify-content-between align-items-center" style="background: #2E383F">
+                                                <h5 class="mb-0" style="color: white">Sub Total Tratamiento</h5>
+                                                <h5 class="mb-0" style="color: white">${t.costo_total ?? 0} Bs.</h5>
                                             </div>
-                                        </div>                                        
-
+                                            <div id="contenedorPagos">
+                                                ${pagosHTML}
+                                            </div>
+                                            <div class="card-header d-flex justify-content-between align-items-center" style="background: #2E383F">
+                                                <h5 class="mb-0" style="color: white">Total Deuda</h5>
+                                                <h5 class="mb-0" style="color: white">${t.diferencia_costo ?? 0} Bs.</h5>
+                                            </div>
+                                            ${(t.costo_total == t.saldo_total) ? `
+                                                <div class="mt-2 text-center" style="padding:10px;">
+                                                    <a href="#" class="btn btn-success btn-sm btnConcluirTratamiento" 
+                                                    data-tratamiento-id="${t.id}" style="width:100%;">
+                                                    Concluir Tratamiento
+                                                    </a>
+                                                </div>
+                                            ` : ``}
+                                        </div>
                                     </div>
-                                </div>
+                                </div>                                        
                             </div>
-                        </div>
                         `;
                     });
 
+                    html += `</div>`; // Cierra accordionGlobal
+
                     div.innerHTML = html;
 
-                    // 🔥 EVENTO: Guardar ID del acordeón cuando se abre
+                    // ============================================================
+                    // 🔥 EVENTOS DEL ACORDEÓN (CON CARGA DE SESIONES)
+                    // ============================================================
+                    // Limpiar eventos anteriores
+                    $('.collapse').off('shown.bs.collapse');
+                    $('.collapse').off('hidden.bs.collapse');
+
+                    // Al abrir
                     $('.collapse').on('shown.bs.collapse', function() {
                         const tratamientoId = $(this).data('tratamiento-id');
                         if (tratamientoId) {
                             acordeonAbiertoId = tratamientoId;
+                            // 🔥 Cargar las sesiones en el div global
+                            cargarsesionTratamiento(tratamientoId);
                         }
                     });
 
-                    // 🔥 EVENTO: Limpiar ID cuando se cierra
+                    // Al cerrar (cuando se abre otro, este se cierra automáticamente)
                     $('.collapse').on('hidden.bs.collapse', function() {
                         const tratamientoId = $(this).data('tratamiento-id');
+                        // Solo limpiamos si el que se cierra es el que estaba abierto
                         if (tratamientoId && acordeonAbiertoId === tratamientoId) {
                             acordeonAbiertoId = null;
+                            // Limpiar el div de sesiones (opcional)
+                            $("#DivSesionTratamiento").html('');
                         }
                     });
 
@@ -1993,7 +2051,6 @@
                         let tratamientoId = $(this).data('tratamiento-id');
 
                         toastConfirm("¿Seguro que deseas concluir este tratamiento?", () => {
-                            // Guardar el ID del acordeón antes de recargar
                             acordeonAbiertoId = tratamientoId;
 
                             $.ajax({
@@ -2016,27 +2073,28 @@
                         });
                     });
 
-                    // Si el acordeón estaba abierto, asegurar que se muestre después de renderizar
+                    // Restaurar acordeón abierto (si existe)
                     if (acordeonAbiertoId) {
                         setTimeout(() => {
-                            // Buscar el collapse con el data-tratamiento-id correspondiente
                             $(`.collapse[data-tratamiento-id="${acordeonAbiertoId}"]`).collapse('show');
                         }, 200);
                     }
 
                 } else {
                     div.innerHTML = `<div class="alert alert-warning">Este paciente no tiene tratamientos en proceso.</div>`;
-                    acordeonAbiertoId = null; // Limpiar si no hay tratamientos
+                    acordeonAbiertoId = null;
+                    $("#DivSesionTratamiento").html(''); // limpiar sesiones
                 }
             })
             .catch(err => {
                 console.error(err);
                 document.getElementById("DivTratamiento").innerHTML = `<div class="alert alert-danger">Error al cargar tratamientos.</div>`;
                 acordeonAbiertoId = null;
+                $("#DivSesionTratamiento").html('');
             });
     }
 
-    function cargarsesionTratamiento(tratamientoId){
+    function cargarsesionTratamiento(tratamientoId) {
         $.ajax({
             url: `/tratamiento/${tratamientoId}/sesiones`,
             type: "GET",
@@ -2052,23 +2110,19 @@
                             </a>
                         </div>
                         <div class="card-body" id="CrearDivSesion">
-
-                        <div class="card-body" id="DivSesion">
+                            <div class="card-body" id="DivSesion">
                 `;
 
-                if (sesiones && sesiones.length > 0) {                         
-
+                if (sesiones && sesiones.length > 0) {
                     html += `<ul class="list-group">`;
                     sesiones.forEach(function (s) {
                         let pagosSesion = data.pagos.filter(p => p.sesion_id === s.id);
-
                         let pagadoSesion = pagosSesion.reduce(
                             (sum, p) => sum + parseFloat(p.monto),
                             0
                         );
 
                         let desglose = {};
-
                         pagosSesion.forEach(p => {
                             let metodo = p.metodo_pago || 'sin metodo';
                             desglose[metodo] = (desglose[metodo] || 0) + parseFloat(p.monto);
@@ -2082,22 +2136,17 @@
                             ? `<img src="/storage/${s.firma}" width="120"/>`
                             : `<a href="#" class="btn mb-2 btn-link btnFirmar" data-id="${s.id}">¿Quieres Firmar?</a>`;
 
-                        // 🔥 PRODUCTOS HTML
+                        // PRODUCTOS
                         let productosHtml = '';
-
                         if (s.productos && s.productos.length > 0) {
                             productosHtml = `
                                 <div style="margin-top:10px;">
                                     <table class="table table-sm table-hover table-borderless">
                                         <thead style="background: #f1f1f1;">
-                                            <tr>
-                                                <th>Producto</th>
-                                                <th>Detalle</th>
-                                            </tr>
+                                            <tr><th>Producto</th><th>Detalle</th></tr>
                                         </thead>
                                         <tbody>
                             `;
-
                             s.productos.forEach(p => {
                                 productosHtml += `
                                     <tr>
@@ -2106,7 +2155,6 @@
                                     </tr>
                                 `;
                             });
-
                             productosHtml += `
                                         </tbody>
                                     </table>
@@ -2126,7 +2174,7 @@
                                         class="btn btn-link btnProductos" 
                                         data-id="${s.id}" 
                                         data-sucursal="${s.sucursal_id}">
-                                            Agregar Materiales  usados
+                                            Agregar Materiales usados
                                         </a>
 
                                         ${productosHtml}
@@ -2150,14 +2198,16 @@
                 }
 
                 html += `
+                            </div>
                         </div>
                     </div>
                 `;
 
-                // Insertar en el div
+                // Insertar en el div global
                 $("#DivSesionTratamiento").html(html);
 
-                $(document).on("click", ".btnFirmar", function(e){
+                // Evento de firma (con off para evitar duplicados)
+                $(document).off('click', '.btnFirmar').on('click', '.btnFirmar', function(e) {
                     e.preventDefault();
 
                     let sesionId = $(this).data("id");
@@ -2165,8 +2215,7 @@
 
                     $td.html(`<i class="fas fa-spinner fa-spin"></i> Generando QR...`);
 
-                    $.post("/generar-token-firma", { sesion_id: sesionId }, function(resp){
-
+                    $.post("/generar-token-firma", { sesion_id: sesionId }, function(resp) {
                         let urlFirma = resp.url;
 
                         let qrHtml = `
@@ -2184,18 +2233,17 @@
                             height: 120
                         });
 
-                        // 🔥 INICIAR VERIFICACIÓN
                         iniciarPollingFirma(sesionId, $td);
-
                     });
-                });                       
-
+                });
             },
             error: function(xhr, status, error) {
-                alert("Error al obtener las sesiones: " + error);
+                toastError("Error al obtener las sesiones: " + error);
             }
         });
     }
+
+    /*HASTA AQUIS*/
 
     let pollingFirmas = {};
 

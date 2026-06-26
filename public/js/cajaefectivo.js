@@ -82,6 +82,7 @@ $(document).ready(function () {
                     success: function (data) {
                         toastSuccess("Egreso registrado correctamente");
                         mostrarEstadoEsperaEfectivo();
+                        FiltrarDatosCajaEfectivo();
                     },
                     error: function (xhr, status, error) {
                         console.error(
